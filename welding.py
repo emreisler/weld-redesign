@@ -78,7 +78,27 @@ class Weld:
         raise NotImplementedError
 
     def measure_resistance_thread(self):
-        raise NotImplementedError
+        if self.ui_object.simulation_mode:
+            raise NotImplementedError
+        else:
+
+            try:
+                self.power_supply = self.rm.open_resource(f'TCPIP0::{self.visa_device_ip}::inst0::INSTR')
+                self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (5))
+                self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (10))
+                temp_values = self.power_supply.query_ascii_values(':MEASure:VOLTage?')
+                measured_voltage = temp_values[0]
+                temp_values = self.power_supply.query_ascii_values(':MEASure:CURRent?')
+                measured_current = temp_values[0]
+                resistanceValue = measured_voltage / measured_current
+                self.ui_object.resistance_input.setText(f"{round(resistanceValue,6)}")
+                self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))
+                self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
+                self.power_supply.write('*RST')
+                self.power_supply.close()
+                self.rm.close()
+            except Exception as error:
+                print("Error in calculating resistance",error)
 
     def emergency_stop_thread(self):
         '''
@@ -86,6 +106,19 @@ class Weld:
         '''
         print("Cycle stopped")
         raise NotImplementedError
+    def set_parameters(self):
+        try:
+            self.voltage1 = float(self.ui_object.voltage1_input)
+            self.current1 = float(self.ui_object.current1_input)
+            self.cycle_time1 = float(self.ui_object.time1_input)
+            self.voltage2 = float(self.ui_object.voltage2_input)
+            self.current2 = float(self.ui_object.current2_input)
+            self.cycle_time2 = float(self.ui_object.time2_input)
+            self.voltage3 = float(self.ui_object.voltage3_input)
+            self.current3 = float(self.ui_object.current3_input)
+            self.cycle_time3 = float(self.ui_object.time3_input)
+        except Exception as error:
+            print("Error while setting parameters : ",error)
 
     def run_cycle_thread(self):
         '''
@@ -94,8 +127,8 @@ class Weld:
         self.time1 = perf_counter()
         if self.ui_object.simulation_mode:
             #Set the power supply to initial current and voltage
-            #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.current1))
-            #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.voltage1))
+            #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.current1))
+            #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.voltage1))
 
             #Set cycle end state to False
             self.cycle_end = False
@@ -110,13 +143,13 @@ class Weld:
                 self.current_cycle_time = perf_counter()
 
                 self.cycle_time = self.current_cycle_time - self.time1
-                self.ui_object.cycleInfo1.setText("Cycle running...{self.stepName}\nRemaining time {round(self.cycleTime1 + self.cycleTime2 + self.cycleTime3 - self.cycleTime, 2)} seconds.. ")
+                self.ui_object.cycleInfo1.setText(f"Cycle running...{self.step_name}\nRemaining time {round(self.cycle_time1 + self.cycle_time2 + self.cycle_time3 - self.cycle_time, 2)} seconds.. ")
 
                 #Check time every loop and jump to second step parameters if cycletime exceeds set time for 1st step
-                if self.cycle_time > self.ui_object.cycleTime1 and self.step1_finished:
+                if self.cycle_time > self.ui_object.cycle_time1 and self.step1_finished:
                     try:
-                        #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.voltage2))
-                        #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.current2))
+                        #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.voltage2))
+                        #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.current2))
                         self.stepName = "2nd Step (dwell at melting)"
                         self.step1_finished = False
                         print("Jumped to step2, voltage2,current2")
@@ -124,10 +157,10 @@ class Weld:
                         print("Error while jumping to step2 : ", error)
 
                 # Check time every loop and jump to third step parameters if cycletime exceeds set time for 2nd step
-                if self.cycle_time > self.ui_object.cycleTime1 + self.ui_object.cycleTime2  and self.step2_finished :
+                if self.cycle_time > self.ui_object.cycle_time1 + self.ui_object.cycle_time2  and self.step2_finished :
                     try:
-                        #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.voltage3))
-                        #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.current3))
+                        #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.voltage3))
+                        #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.current3))
                         self.stepName = "3rd step (dwell at recrystallization)"
                         self.step2_finished = False
                         print("Jumped to step3, voltage3,current3")
@@ -135,7 +168,7 @@ class Weld:
                         print("Error while jumping to step3 :",error)
 
                 # Check time every loop and jump to third step parameters if cycletime exceeds set time for 2nd step
-                if self.cycle_time > self.ui_object.cycleTime1 + self.ui_object.cycleTime2 + self.ui_object.cycleTime3 and self.step3_finished:
+                if self.cycle_time > self.ui_object.cycle_time1 + self.ui_object.cycle_time2 + self.ui_object.cycle_time3 and self.step3_finished:
                     try:
                         #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
                         #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))
@@ -147,17 +180,17 @@ class Weld:
 
 
 
-            self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
-            self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))
-            self.power_supply.write('*RST')
-            self.power_supply.close()
-            self.rm.close()
+            #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
+            #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))
+            #self.power_supply.write('*RST')
+            #self.power_supply.close()
+            #self.rm.close()
             self.ui_object.run_cycle_button.setStyleSheet("background-color: rgb(77,77,77); :hover : background-color: rgba(183, 134, 32, 20%);border: 1px solid #b78620;")
             self.ui_object.run_cycle_button.setText("RUN")
             self.ui_object.run_cycle_button.setEnabled(True)
             print("Cycle Completed")
             return "CYCLE COMPLETED"
-            raise NotImplementedError("Simulation Mode")
+            
         else:
 
             #Set the power supply to initial current and voltage
