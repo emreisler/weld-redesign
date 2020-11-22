@@ -1,1125 +1,1375 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QFrame, QLineEdit,QMessageBox,QTabWidget
-from PyQt5.QtCore import QRect
-from PyQt5.QtGui import QPixmap,QFont
-from pyqtgraph.Qt import QtCore
-from collections import deque
-
-
-class UI(QWidget):
-    def __init__(self, title = ""):
-        super().__init__() #inherit init of QWidget
-        self.title = title
-        self.setStyleSheet(open("Combinear.qss","r").read())
-        self.setWindowTitle(self.title)
-        self.left = 0
-        self.top = 0
-        self.width = 1250
-        self.height = 950
-        self.maxLen = 50
-        self.simu = False
-
-        self.voltageMeasurements = deque()
-        self.currentMeasurements = deque()
-        self.setVoltage1 = deque()
-        self.setCurrent1 = deque()
-        self.setVoltage2 = deque()
-        self.setCurrent2 = deque()
-        self.setVoltage3 = deque()
-        self.setCurrent3 = deque()
-        self.resistanceMeasurements = deque()
-        self.graphTime = deque()
-        self.tc1Values = deque()
-        self.tc2Values = deque()
-        self.tc3Values = deque()
-        self.tc4Values = deque()
-        self.tc5Values = deque()
-        self.tc6Values = deque()
-        self.setTime1 = deque()
-        self.setTime2 = deque()
-        self.setTime3 = deque()
-        self.meltLower = deque()
-        self.meltUpper = deque()
-        self.dwellLower = deque()
-        self.dwellUpper = deque()
-        self.cycleContinue = False
-        self.CurrDrivenCycleMode = True
-        self.measureTemperature = False
-        self.time1 = 0
-        self.buttonWidth = 150
-        self.buttonHeight = 40
-        self.inputWidth = 150
-        self.inputHeight = 30
-        self.labelWidth = 150
-        self.labelHeight = 30
-        self.host = '192.168.1.30' # PLC IP
-        self.port = 502 # PLC PORT
-        self.inputs()
-        self.showMaximized()
-
-
-    def inputs(self):
-
-
-        self.logoLabel = QLabel(self)
-
-        # loading image
-        self.pixmap = QPixmap('images/logo.svg')
-
-        # adding image to label
-        self.logoLabel.setPixmap(self.pixmap)
-
-        # Optional, resize label to image size
-        self.logoLabel.move(self.size().width()-300,20)
-
-        self.frameAreaInputs = QFrame(self)
-        self.frameAreaInputs.setGeometry(QRect(50,20,675,250))
-        self.frameAreaInputs.setStyleSheet("border-width: 1; font-size : 15px;border-radius: 3;border-style: solid;border-color: rgb(100,100,100)")
-
-        self.areaInputsLabel = QLabel("MESH PARAMETERS",self.frameAreaInputs)
-        self.areaInputsLabel.setGeometry(QRect(250,10,200,30))
-        self.areaInputsLabel.setStyleSheet("border-style: none;color : rgb(30, 146, 202); font-size : 20px")
-
-        self.resistanceInputLabel = QLabel("Resistance(ohm) : ",self.frameAreaInputs)
-        self.resistanceInputLabel.setGeometry(QRect(50,50,150,50))
-
-        self.lengthInputLabel = QLabel("Length(mm) : ",self.frameAreaInputs)
-        self.lengthInputLabel.setGeometry(QRect(50,100,150,50))
-
-        self.widthInputLabel = QLabel("Width(mm) : ",self.frameAreaInputs)
-        self.widthInputLabel.setGeometry(QRect(50,150,150,50))
-
-        self.resistanceInput = QLineEdit(self.frameAreaInputs)
-        self.resistanceInput.setGeometry(QRect(200,50,150,50))
-        self.resistanceInput.setPlaceholderText("Resistance(ohm)")
-
-
-        self.lengthInput = QLineEdit(self.frameAreaInputs)
-        self.lengthInput.setGeometry(QRect(200,100,150,50))
-        self.lengthInput.setPlaceholderText("Length of bond line")
-
-        self.widthInput = QLineEdit(self.frameAreaInputs)
-        self.widthInput.setGeometry(QRect(200,150,150,50))
-        self.widthInput.setPlaceholderText("Width of bond line")
-
-        self.calculateResistanceButton = QPushButton("CALCULATE RESISTANCE",self.frameAreaInputs)
-        self.calculateResistanceButton.setGeometry(QRect(450,50, self.buttonWidth+50, self.buttonHeight))
-
-
-        self.calculateParameterseButton = QPushButton("CALCULATE PARAMETERS",self.frameAreaInputs)
-        self.calculateParameterseButton.setGeometry(QRect(450,100, self.buttonWidth+50,self.buttonHeight))
-
-
-        self.missingDimension = QLabel("",self.frameAreaInputs)
-        self.missingDimension.setGeometry(QRect(350,150,150,30))
-        self.missingDimension.setStyleSheet("border-style: none;color: red")
-
-        self.soirNoLabel = QLabel("SOIR NO: ", self.frameAreaInputs)
-        self.soirNoLabel.setGeometry(QRect(450,150,150,50))
-
-        self.soirNoInput = QLineEdit(self.frameAreaInputs)
-        self.soirNoInput.setGeometry(QRect(525, 150, 125, 50))
-        self.soirNoInput.setPlaceholderText("Soir No")
-
-        #CYCLE PARAMETER INPUTS
-        self.frameCycleInputs = QFrame(self)
-        self.frameCycleInputs.setGeometry(QRect(50,300,675,300))
-        self.frameCycleInputs.setStyleSheet("border-width: 1;border-radius: 3;font-size : 15px; border-style: solid;border-color: rgb(100,100,100)")
-
-        self.currDrivenInputs = QFrame(self.frameCycleInputs)
-        self.currDrivenInputs.setGeometry(QRect(0,0,675,300))
-
-        self.tempDrivenInputs = QFrame(self.frameCycleInputs)
-        self.tempDrivenInputs.setGeometry(QRect(0,0,675,300))
-
-        self.cyleInputLabel = QLabel("CYCLE PARAMETERS ",self.frameCycleInputs)
-        self.cyleInputLabel.setGeometry(QRect(250,10,200,30))
-        self.cyleInputLabel.setStyleSheet("border-style: none;color : rgb(30, 146, 202); font-size : 20px")
-
-        self.cycleType = QTabWidget(self.frameCycleInputs)
-        self.cycleType.setGeometry(QRect(50,40,600,30))
-        self.currDrivenTabBar = QPushButton()
-        self.tempDrivenTabBar = QPushButton()
-        self.cycleType.addTab(self.currDrivenTabBar,"CURRENT MODE")
-        self.cycleType.addTab(self.tempDrivenTabBar,"TEMP MODE")
-
-        #self.tempDrivenTabBar.connect(self.temp_driven_inputs)  # changed!
-
-        self.voltageInputLabel = QLabel("Voltage(V) raise : ",self.frameCycleInputs)
-        self.voltageInputLabel.setGeometry(QRect(50,80,150,50))
-
-        self.currentInputLabel = QLabel("Current(A) raise : ",self.frameCycleInputs)
-        self.currentInputLabel.setGeometry(QRect(50,130,150,50))
-
-        self.timeInputLabel = QLabel("Time(s) raise : ",self.frameCycleInputs)
-        self.timeInputLabel.setGeometry(QRect(50,180,150,50))
-
-        self.voltageInput = QLineEdit(self.frameCycleInputs)
-        self.voltageInput.setGeometry(QRect(200,80,50,50))
-        self.voltageInput.setText("50")
-
-        self.curentInput = QLineEdit(self.frameCycleInputs)
-        self.curentInput.setGeometry(QRect(200,130,50,50))
-        self.curentInput.setPlaceholderText("0")
-
-        self.timeInput = QLineEdit(self.frameCycleInputs)
-        self.timeInput.setGeometry(QRect(200,180,50,50))
-        self.timeInput.setPlaceholderText("0")
-
-        self.voltageInputLabel2 = QLabel("Voltage(V) 1st dwell : ",self.frameCycleInputs)
-        self.voltageInputLabel2.setGeometry(QRect(250,80,150,50))
-
-        self.currentInputLabel2 = QLabel("Current(A) 1st dwell : ",self.frameCycleInputs)
-        self.currentInputLabel2.setGeometry(QRect(250,130,150,50))
-
-        self.timeInputLabel2 = QLabel("Time(s) 1st dwell : ",self.frameCycleInputs)
-        self.timeInputLabel2.setGeometry(QRect(250,180,150,50))
-
-        self.voltageInput2 = QLineEdit(self.frameCycleInputs)
-        self.voltageInput2.setGeometry(QRect(400,80,50,50))
-        self.voltageInput2.setText("50")
-
-        self.curentInput2 = QLineEdit(self.frameCycleInputs)
-        self.curentInput2.setGeometry(QRect(400,130,50,50))
-        self.curentInput2.setPlaceholderText("0")
-
-        self.timeInput2 = QLineEdit(self.frameCycleInputs)
-        self.timeInput2.setGeometry(QRect(400,180,50,50))
-        self.timeInput2.setPlaceholderText("0")
-
-        self.voltageInputLabel3 = QLabel("Voltage(V) 2nd dwell : ",self.frameCycleInputs)
-        self.voltageInputLabel3.setGeometry(QRect(450,80,150,50))
-
-        self.currentInputLabel3 = QLabel("Current(A) 2nd dwell : ",self.frameCycleInputs)
-        self.currentInputLabel3.setGeometry(QRect(450,130,150,50))
-
-        self.timeInputLabel3 = QLabel("Time(s) 2nd dwell : ",self.frameCycleInputs)
-        self.timeInputLabel3.setGeometry(QRect(450,180,150,50))
-
-        self.voltageInput3 = QLineEdit(self.frameCycleInputs)
-        self.voltageInput3.setGeometry(QRect(600,80,50,50))
-        self.voltageInput3.setText("50")
-
-        self.curentInput3 = QLineEdit(self.frameCycleInputs)
-        self.curentInput3.setGeometry(QRect(600,130,50,50))
-        self.curentInput3.setPlaceholderText("0")
-
-        self.timeInput3 = QLineEdit(self.frameCycleInputs)
-        self.timeInput3.setGeometry(QRect(600,180,50,50))
-        self.timeInput3.setPlaceholderText("0")
-
-        #Temperature Inputs
-
-        self.meltTempInputLabel = QLabel("Melting temperature : ", self.frameCycleInputs)
-        self.meltTempInputLabel.setGeometry(QRect(50, 80, 150, 50))
-        self.meltTempInputLabel.hide()
-
-        self.meltTimeInputLabel = QLabel("Time(s) melting : ", self.frameCycleInputs)
-        self.meltTimeInputLabel.setGeometry(QRect(50, 130, 150, 50))
-        self.meltTimeInputLabel.hide()
-
-        self.meltTempInput = QLineEdit(self.frameCycleInputs)
-        self.meltTempInput.setGeometry(QRect(200, 80, 50, 50))
-        self.meltTempInput.setPlaceholderText("0")
-        self.meltTempInput.hide()
-
-        self.meltTimeInputRun = QLineEdit(self.frameCycleInputs)
-        self.meltTimeInputRun.setGeometry(QRect(200, 130, 50, 50))
-        self.meltTimeInputRun.setPlaceholderText("0")
-        self.meltTimeInputRun.hide()
-
-        self.dwellTempInputLabel = QLabel("Dwell temperature : ", self.frameCycleInputs)
-        self.dwellTempInputLabel.setGeometry(QRect(300, 80, 150, 50))
-        self.dwellTempInputLabel.hide()
-
-        self.dwellTimeInputLabel = QLabel("Time(s) dwell : ", self.frameCycleInputs)
-        self.dwellTimeInputLabel.setGeometry(QRect(300, 130, 150, 50))
-        self.dwellTimeInputLabel.hide()
-
-        self.dwellTempInput = QLineEdit(self.frameCycleInputs)
-        self.dwellTempInput.setGeometry(QRect(450, 80, 50, 50))
-        self.dwellTempInput.setPlaceholderText("0")
-        self.dwellTempInput.hide()
-
-        self.dwellTimeInputRun = QLineEdit(self.frameCycleInputs)
-        self.dwellTimeInputRun.setGeometry(QRect(450, 130, 50, 50))
-        self.dwellTimeInputRun.setPlaceholderText("0")
-        self.dwellTimeInputRun.hide()
-
-
-
-        self.set_paramsButton = QPushButton("SET PARAMETERS",self.frameCycleInputs)
-        self.set_paramsButton.setGeometry(QRect(500,250, self.buttonWidth,self.buttonHeight))
-        self.set_paramsButton.clicked.connect(self.set_parameters)
-
-        #PARAMETERS SHOWN
-        self.frameCycleLabels = QFrame(self)
-        self.frameCycleLabels.setGeometry(QRect(50,650,675,250))
-        self.frameCycleLabels.setStyleSheet("border-width: 1;border-radius: 3;border-style: solid;border-color: rgb(100,100,100)")
-
-        self.step1Label = QLabel("STEP-1",self.frameCycleLabels)
-        self.step1Label.setGeometry(QRect(50,10,200,30))
-        self.step1Label.setStyleSheet("border-style: none;color : rgb(30, 146, 202); font-size : 20px")
-
-        self.step2Label = QLabel("STEP-2",self.frameCycleLabels)
-        self.step2Label.setGeometry(QRect(200,10,200,30))
-        self.step2Label.setStyleSheet("border-style: none;color : rgb(30, 146, 202); font-size : 20px")
-
-        self.step3Label = QLabel("STEP-3",self.frameCycleLabels)
-        self.step3Label.setGeometry(QRect(350,10,200,30))
-        self.step3Label.setStyleSheet("border-style: none;color : rgb(30, 146, 202); font-size : 20px")
-
-        self.voltageLabel = QLabel("0 V (raise)",self.frameCycleLabels)
-        self.voltageLabel.setGeometry(QRect(50,50,150,20))
-        self.voltageLabel.setStyleSheet("border-style: none;font-size:15px")
-
-        self.currentLabel = QLabel("0 A (raise)",self.frameCycleLabels)
-        self.currentLabel.setGeometry(QRect(50,100,150,20))
-        self.currentLabel.setStyleSheet("border-style: none;font-size:15px")
-
-        self.timeLabel = QLabel("0 s (raise)",self.frameCycleLabels)
-        self.timeLabel.setGeometry(QRect(50,150,150,20))
-        self.timeLabel.setStyleSheet("border-style: none;font-size:15px")
-
-        self.voltageLabel2 = QLabel("0 V (1st dwell)",self.frameCycleLabels)
-        self.voltageLabel2.setGeometry(QRect(200,50,150,20))
-        self.voltageLabel2.setStyleSheet("border-style: none;font-size:15px")
-
-        self.currentLabel2 = QLabel("0 A (1st dwell)",self.frameCycleLabels)
-        self.currentLabel2.setGeometry(QRect(200,100,150,20))
-        self.currentLabel2.setStyleSheet("border-style: none;font-size:15px")
-
-        self.timeLabel2 = QLabel("0 s (1st dwell)",self.frameCycleLabels)
-        self.timeLabel2.setGeometry(QRect(200,150,150,20))
-        self.timeLabel2.setStyleSheet("border-style: none;font-size:15px")
-
-        self.voltageLabel3 = QLabel("0 V (2nd dwell)",self.frameCycleLabels)
-        self.voltageLabel3.setGeometry(QRect(350,50,150,20))
-        self.voltageLabel3.setStyleSheet("border-style: none;font-size:15px")
-
-        self.currentLabel3 = QLabel("0 A 2nd dwell)",self.frameCycleLabels)
-        self.currentLabel3.setGeometry(QRect(350,100,150,20))
-        self.currentLabel3.setStyleSheet("border-style: none;font-size:15px")
-
-        self.timeLabel3 = QLabel("0 s (2nd dwell)",self.frameCycleLabels)
-        self.timeLabel3.setGeometry(QRect(350,150,150,20))
-        self.timeLabel3.setStyleSheet("border-style: none;font-size:15px")
-
-        #Temperature Labels
-        self.meltTempLabel = QLabel("0  C°", self.frameCycleLabels)
-        self.meltTempLabel.setGeometry(QRect(50, 50, 150, 20))
-        self.meltTempLabel.setStyleSheet("border-style: none;font-size:15px")
-        self.meltTempLabel.hide()
-
-        self.meltTimeLabel = QLabel("0 s", self.frameCycleLabels)
-        self.meltTimeLabel.setGeometry(QRect(50, 100, 150, 20))
-        self.meltTimeLabel.setStyleSheet("border-style: none;font-size:15px")
-        self.meltTimeLabel.hide()
-
-        self.dwellTempLabel = QLabel("0 C°", self.frameCycleLabels)
-        self.dwellTempLabel.setGeometry(QRect(200, 50, 150, 20))
-        self.dwellTempLabel.setStyleSheet("border-style: none;font-size:15px")
-        self.dwellTempLabel.hide()
-
-        self.dwellTimeLabel = QLabel("0 s", self.frameCycleLabels)
-        self.dwellTimeLabel.setGeometry(QRect(200, 100, 150, 20))
-        self.dwellTimeLabel.setStyleSheet("border-style: none;font-size:15px")
-        self.dwellTimeLabel.hide()
-
-        #RUN BUTTON
-        self.runButton = QPushButton("RUN",self.frameCycleLabels)
-        self.runButton.setGeometry(QRect(510,50, 150,120))
-
-        self.runButton.setFont(QFont("Arial", 20))
-
-        #EMERGENCYSTOP BUTTON
-        self.stopButton = QPushButton(f"EMERGENCY\nSTOP",self)
-        self.stopButton.setGeometry(QRect(self.width - 520, 20, 200,100))
-
-        self.stopButton.setIconSize(QtCore.QSize(100,100))
-        self.stopButton.setFont(QFont("Arial", 15))
-        self.stopButton.setStyleSheet("color: red")
-
-
-        #TC VALUES
-        self.tcMeasurementsFrame = QFrame(self)
-        self.tcMeasurementsFrame.setGeometry(QRect(self.width-300,650, 300,250))
-        self.tcMeasurementsFrame.setStyleSheet("font-size:20px; color : #c2c2c2;border-width: 1;border-radius: 3;border-style: solid;border-color: rgb(100,100,100)")
-
-        self.tc1Label = QLabel("TC1 ",self.tcMeasurementsFrame)
-        self.tc1Label.setGeometry(QRect(20,0,200,30))
-        self.tc1Label.setStyleSheet("border-style: none")
-
-        self.tc2Label = QLabel("TC2 ",self.tcMeasurementsFrame)
-        self.tc2Label.setGeometry(QRect(20,40,200,30))
-        self.tc2Label.setStyleSheet("border-style: none")
-
-        self.tc3Label = QLabel("TC3 ",self.tcMeasurementsFrame)
-        self.tc3Label.setGeometry(QRect(20,80,200,30))
-        self.tc3Label.setStyleSheet("border-style: none")
-
-        self.tc4Label = QLabel("TC4 ",self.tcMeasurementsFrame)
-        self.tc4Label.setGeometry(QRect(20,120,200,30))
-        self.tc4Label.setStyleSheet("border-style: none")
-
-        self.tc5Label = QLabel("TC5 ",self.tcMeasurementsFrame)
-        self.tc5Label.setGeometry(QRect(20,160,200,30))
-        self.tc5Label.setStyleSheet("border-style: none")
-
-        self.tc6Label = QLabel("TC6 ", self.tcMeasurementsFrame)
-        self.tc6Label.setGeometry(QRect(150, 0, 200, 30))
-        self.tc6Label.setStyleSheet("border-style: none")
-
-        self.tc7Label = QLabel("TC7 ", self.tcMeasurementsFrame)
-        self.tc7Label.setGeometry(QRect(150, 40, 200, 30))
-        self.tc7Label.setStyleSheet("border-style: none")
-
-        self.tc8Label = QLabel("TC8 ", self.tcMeasurementsFrame)
-        self.tc8Label.setGeometry(QRect(150, 80, 200, 30))
-        self.tc8Label.setStyleSheet("border-style: none")
-
-        self.tc9Label = QLabel("TC9 ", self.tcMeasurementsFrame)
-        self.tc9Label.setGeometry(QRect(150, 120, 200, 30))
-        self.tc9Label.setStyleSheet("border-style: none")
-
-        self.tc10Label = QLabel("TC10 ", self.tcMeasurementsFrame)
-        self.tc10Label.setGeometry(QRect(150, 160, 200, 30))
-        self.tc10Label.setStyleSheet("border-style: none")
-
-        self.tcInfoButton = QPushButton("TEMPERATURES",self.tcMeasurementsFrame)
-        self.tcInfoButton.setGeometry(QRect(20 ,200, self.buttonWidth,self.buttonHeight))
-        self.tcInfoButton.setStyleSheet("font-size:15px; color :white")
-        self.tcInfoButton.clicked.connect(self.get_temperatures_thread)
-
-        self.stopTcMeasurement = QPushButton("STOP",self.tcMeasurementsFrame)
-        self.stopTcMeasurement.setGeometry(QRect(200 ,200, self.buttonWidth-100,self.buttonHeight))
-        self.stopTcMeasurement.setStyleSheet("font-size:15px; color :white")
-        self.stopTcMeasurement.clicked.connect(self.stop_tc_measurement)
-
-        #INFO LABEL
-        self.infoLabel = QLabel("",self)
-        self.infoLabel.setGeometry(QRect(self.width-520,130, 250,50))
-        self.infoLabel.setFont(QFont("Arial", 12))
-        self.infoLabel.setStyleSheet("color: white")
-
-
-        #CONNECTION CHECK BUTTON
-        self.check_connectionButton = QPushButton("POWER SUPPLY",self)
-        self.check_connectionButton.setGeometry(QRect(self.width-200 ,self.height-750, self.buttonWidth+20,self.buttonHeight+20))
-        self.check_connectionButton.setFont(QFont("Arial", 9))
-
-
-        self.check_connectionPLCButton = QPushButton("PLC",self)
-        self.check_connectionPLCButton.setGeometry(QRect(self.width-200 ,self.height-700, self.buttonWidth+20,self.buttonHeight+20))
-        self.check_connectionPLCButton.setFont(QFont("Arial", 9))
-
-
-        self.check_connectionLabel = QLabel("",self)
-        self.check_connectionLabel.setGeometry(QRect(self.width-200,self.height-650, self.buttonWidth,self.buttonHeight))
-
-        #MEASUREMENTS PANEL
-        self.measurementFrame = QFrame(self)
-        self.measurementFrame.setGeometry(QRect(self.width-300,300,400,200))
-        self.measurementFrame.setStyleSheet("border-style: none;font-size:30px")
-
-        self.measuredLabel = QLabel("MEASUREMENTS",self.measurementFrame)
-        self.measuredLabel.setGeometry(QRect(0,0,200,50))
-        self.measuredLabel.setStyleSheet("color:rgb(30, 146, 202); font-size:20px")
-
-        self.measuredVoltageLabel = QLabel("0 Volt",self.measurementFrame)
-        self.measuredVoltageLabel.setGeometry(QRect(0,50,400,50))
-
-        self.measuredCurrentLabel = QLabel("0 Amper",self.measurementFrame)
-        self.measuredCurrentLabel.setGeometry(QRect(0,100,400,50))
-
-        self.measuredResistanceLabel = QLabel("0 ohm",self.measurementFrame)
-        self.measuredResistanceLabel.setGeometry(QRect(0,150,400,50))
-
-        #RESET GRAPH BUTTON
-        self.resetGraphButton = QPushButton("RESET GRAPH",self)
-        self.resetGraphButton.setFont(QFont("Arial", 9))
-        self.resetGraphButton.setGeometry(QRect(self.width - 200, self.height-400 , self.buttonWidth,self.buttonHeight))
-        self.resetGraphButton.clicked.connect(self.reset_graph)
-
-    def temp_driven_inputs(self):
-
-        if self.CurrDrivenCycleMode:
-            self.CurrDrivenCycleMode = False
-
-            self.voltageInputLabel.hide()
-
-            self.currentInputLabel.hide()
-
-            self.timeInputLabel.hide()
-
-            self.voltageInput.hide()
-
-            self.curentInput.hide()
-
-            self.timeInput.hide()
-
-            self.voltageInputLabel2.hide()
-
-            self.currentInputLabel2.hide()
-
-            self.timeInputLabel2.hide()
-
-            self.voltageInput2.hide()
-
-            self.curentInput2.hide()
-
-            self.timeInput2.hide()
-
-            self.voltageInputLabel3.hide()
-
-            self.currentInputLabel3.hide()
-
-            self.timeInputLabel3.hide()
-
-            self.voltageInput3.hide()
-
-            self.curentInput3.hide()
-
-            self.timeInput3.hide()
-
-            #TEMPERATURE INPUTS
-            self.meltTempInputLabel.show()
-
-            self.meltTimeInputLabel.show()
-
-            self.meltTempInput.show()
-
-            self.meltTimeInputRun.show()
-
-            self.dwellTempInputLabel.show()
-
-            self.dwellTimeInputLabel.show()
-
-            self.dwellTempInput.show()
-
-            self.dwellTimeInputRun.show()
-
-            #Parameters for temperature shown labels
-
-            self.meltTempLabel.show()
-            self.meltTimeLabel.show()
-            self.dwellTempLabel.show()
-            self.dwellTimeLabel.show()
-
-            # Parameters for current - voltage shown labels
-            self.voltageLabel.hide()
-            self.currentLabel.hide()
-            self.timeLabel.hide()
-            self.voltageLabel2.hide()
-            self.currentLabel2.hide()
-            self.timeLabel2.hide()
-            self.voltageLabel3.hide()
-            self.currentLabel3.hide()
-            self.timeLabel3.hide()
-
-
-        else:
-            self.CurrDrivenCycleMode = True
-
-            self.voltageInputLabel.show()
-
-            self.currentInputLabel.show()
-
-            self.timeInputLabel.show()
-
-            self.voltageInput.show()
-
-            self.curentInput.show()
-
-            self.timeInput.show()
-
-            self.voltageInputLabel2.show()
-
-            self.currentInputLabel2.show()
-
-            self.timeInputLabel2.show()
-
-            self.voltageInput2.show()
-
-            self.curentInput2.show()
-
-            self.timeInput2.show()
-
-            self.voltageInputLabel3.show()
-
-            self.currentInputLabel3.show()
-
-            self.timeInputLabel3.show()
-
-            self.voltageInput3.show()
-
-            self.curentInput3.show()
-
-            self.timeInput3.show()
-
-            self.meltTempInputLabel.hide()
-
-            self.meltTimeInputLabel.hide()
-
-            self.meltTempInput.hide()
-
-            self.meltTimeInputRun.hide()
-
-            self.dwellTempInputLabel.hide()
-
-            self.dwellTimeInputLabel.hide()
-
-            self.dwellTempInput.hide()
-
-            self.dwellTimeInputRun.hide()
-
-            # Parameters for temperature shown labels
-
-            self.meltTempLabel.hide()
-            self.meltTimeLabel.hide()
-            self.dwellTempLabel.hide()
-            self.dwellTimeLabel.hide()
-
-            # Parameters for current - voltage shown labels
-            self.voltageLabel.show()
-            self.currentLabel.show()
-            self.timeLabel.show()
-            self.voltageLabel2.show()
-            self.currentLabel2.show()
-            self.timeLabel2.show()
-            self.voltageLabel3.show()
-            self.currentLabel3.show()
-            self.timeLabel3.show()
-
-        return "Done"
-
-    def get_temperatures_thread(self):
-        try:
-            self.getTemperaturesThread = threading.Thread(target=self.get_temperatures)
-            self.getTemperaturesThread.start()
-
-            print("Thread Completed")
-            return "Thread Completed"
-        except:
-            print("Thread Couldn't Completed")
-            return "Thread Couldn't Completed"
-
-    def get_temperatures(self):
-        self.measureTemperature = True
-
-        self.client = ModbusTcpClient(self.host, self.port)
-        self.client.connect()
-
-        while self.measureTemperature:
-            try:
-
-                self.tcValues = self.client.read_holding_registers(40,6,unit=0)
-                assert(self.tcValues.function_code < 0x80)     # test that we are not an error
-
-                self.tc1Label.setText(f"TC1 {self.tcValues.registers[0]/10} C°")
-                self.tc2Label.setText(f"TC2 {self.tcValues.registers[1]/10} C°")
-                self.tc3Label.setText(f"TC3 {self.tcValues.registers[2]/10} C°" )
-                self.tc4Label.setText(f"TC4 {self.tcValues.registers[3]/10} C°")
-                self.tc5Label.setText(f"TC5 {self.tcValues.registers[4]/10} C°")
-                self.tc6Label.setText(f"TC6 {self.tcValues.registers[5]/10} C°")
-                time.sleep(0.5)
-                #print("Connected to DataLogger and temperatures are written on mainwindow")
-
-            except Exception as error:
-
-                print(error," DataLogger connection error")
-                return "Couldn't get temperatures from data logger"
-        print("Thermocouple measurements has stopped")
-        return "Thermocouple measurements has stopped"
-
-    def stop_tc_measurement(self):
-        self.measureTemperature = False
-        return "Temperature reading is stopped"
-
-
-    def check_connection(self):
-
-        try:
-
-            rm = visa.ResourceManager()
-            SGX50X200D = rm.open_resource('TCPIP0::192.168.1.32::inst0::INSTR')
-            time.sleep(0.5)
-            SGX50X200D.close()
-            rm.close()
-
-            self.check_connectionButton.setStyleSheet("background-color: green")
-            self.check_connectionButton.setText("CONNECTED")
-
-        except Exception as error:
-            print(error)
-            self.check_connectionButton.setStyleSheet("background-color: red")
-            self.check_connectionButton.setText(F"NOT CONNECTED \nTRY AGAIN")
-
-    def graph(self):
-
-        #self.appGraph = QtGui.QApplication([])
-        self.win = pg.GraphicsWindow(title="Cycle Graph")
-        self.win.setGeometry(QRect(50,50, 1200,1200))
-        self.win.showMaximized()
-        self.p1 = self.win.addPlot(colspan=2,title = "V,I,R-t")
-
-        self.p1.setLabel('left', 'Voltage,Current,Resistance', units='V,A,ohm')
-        self.p1.setLabel('bottom', 'Time', units='s')
-        self.p1.showGrid(y= True, x = True, alpha = 1.)
-
-        self.graphWidth = self.win.frameGeometry().width()
-        self.graphHeight = self.win.frameGeometry().height()
-
-
-        #Power Supply
-        self.curve1 = self.p1.plot(self.voltageMeasurements,self.graphTime,name = "Voltage",pen=pg.mkPen('r',width=2))
-        self.curve2 = self.p1.plot(self.currentMeasurements,self.graphTime,name= "Current",pen=pg.mkPen('g',width=2))
-        self.curve3 = self.p1.plot(self.setVoltage1,name = "Voltage raise Set", pen=pg.mkPen('r',style=QtCore.Qt.DashLine,width = 0.5))
-        self.curve4 = self.p1.plot(self.setCurrent1,name = "Current raise Set",pen=pg.mkPen('g',style=QtCore.Qt.DashLine,width = 0.5))
-        self.curve5 = self.p1.plot(self.setVoltage2,name = "Voltage 1st dwell Set",pen=pg.mkPen('r',style=QtCore.Qt.DotLine,width = 0.5))
-        self.curve6 = self.p1.plot(self.setCurrent2,name = "Current 1st dwell Set",pen=pg.mkPen('g',style=QtCore.Qt.DotLine,width = 0.5))
-        self.curve13 = self.p1.plot(self.setVoltage3,name = "Voltage 2nd dwell Set",pen=pg.mkPen('r',style=QtCore.Qt.DotLine,width = 1))
-        self.curve14 = self.p1.plot(self.setCurrent3,name = "Current 2nd dwell Set",pen=pg.mkPen('g',style=QtCore.Qt.DotLine,width = 1))
-        self.curve15 = self.p1.plot(self.setTime1,name = "Raise time line",pen=pg.mkPen('g',style=QtCore.Qt.DotLine,width = 2))
-        self.curve16 = self.p1.plot(self.setTime2,name = "1st Dwell time line",pen=pg.mkPen('b',style=QtCore.Qt.DotLine,width = 2))
-        self.curve17 = self.p1.plot(self.setTime3,name = "2nd Dwell time line",pen=pg.mkPen('r',style=QtCore.Qt.DotLine,width = 2))
-        self.curve18 = self.p1.plot(self.meltLower, name="Melting Temp Lower Limit",pen=pg.mkPen('w', style=QtCore.Qt.DotLine, width=2))
-        self.curve19 = self.p1.plot(self.meltUpper, name="Melting Temp Upper Limit",pen=pg.mkPen('w', style=QtCore.Qt.DotLine, width=2))
-        self.curve20 = self.p1.plot(self.dwellLower, name="Dwell Temp Lower Limit",pen=pg.mkPen('w', style=QtCore.Qt.DotLine, width=2))
-        self.curve21 = self.p1.plot(self.dwellUpper, name="Dwell Temp Upper Limit",pen=pg.mkPen('w', style=QtCore.Qt.DotLine, width=2))
-
-        self.curve7 = self.p1.plot(self.resistanceMeasurements,self.graphTime,name = "Resistance",pen=pg.mkPen('b',width=2))
-
-        #DataLogger
-        self.curve8 = self.p1.plot(self.tc1Values,self.graphTime,name = "TC1",pen=pg.mkPen('c',width=2))
-        self.curve9 = self.p1.plot(self.tc2Values,self.graphTime,name = "TC2",pen=pg.mkPen('m',width=2))
-        self.curve10 = self.p1.plot(self.tc3Values,self.graphTime,name = "TC3",pen=pg.mkPen('y',width=2))
-        self.curve11 = self.p1.plot(self.tc4Values,self.graphTime,name = "TC4",pen=pg.mkPen('r',width=2))
-        self.curve12 = self.p1.plot(self.tc5Values,self.graphTime,name = "TC5",pen=pg.mkPen('w',width=2))
-        self.curve22 = self.p1.plot(self.tc6Values, self.graphTime, name="TC6", pen=pg.mkPen('g', width=2))
-
-        #AddLegend
-        self.legend = self.p1.addLegend(offset=(950, 20))
-
-        self.legend.addItem(self.curve1, name=self.curve1.opts['name'])
-        self.legend.addItem(self.curve2, name=self.curve2.opts['name'])
-        #self.legend.addItem(self.curve3, name=self.curve3.opts['name'])
-        #self.legend.addItem(self.curve4, name=self.curve4.opts['name'])
-        #self.legend.addItem(self.curve5, name=self.curve5.opts['name'])
-        #self.legend.addItem(self.curve6, name=self.curve6.opts['name'])
-        self.legend.addItem(self.curve7, name=self.curve7.opts['name'])
-        self.legend.addItem(self.curve8, name=self.curve8.opts['name'])
-        self.legend.addItem(self.curve9, name=self.curve9.opts['name'])
-        self.legend.addItem(self.curve10, name=self.curve10.opts['name'])
-        self.legend.addItem(self.curve11, name=self.curve11.opts['name'])
-        self.legend.addItem(self.curve12, name=self.curve12.opts['name'])
-        self.legend.addItem(self.curve22, name=self.curve22.opts['name'])
-        #self.legend.addItem(self.curve13, name=self.curve13.opts['name'])
-        #self.legend.addItem(self.curve14, name=self.curve14.opts['name'])
-        self.legend.addItem(self.curve15, name=self.curve15.opts['name'])
-        self.legend.addItem(self.curve16, name=self.curve16.opts['name'])
-        self.legend.addItem(self.curve17, name=self.curve17.opts['name'])
-        #self.legend.addItem(self.curve18, name=self.curve18.opts['name'])
-        #self.legend.addItem(self.curve19, name=self.curve19.opts['name'])
-        #self.legend.addItem(self.curve20, name=self.curve20.opts['name'])
-        #self.legend.addItem(self.curve21, name=self.curve21.opts['name'])
-
-    def reset_graph(self):
-        try:
-            self.voltageMeasurements.clear()
-            self.currentMeasurements.clear()
-            self.setVoltage1.clear()
-            self.setCurrent1.clear()
-            self.setVoltage2.clear()
-            self.setCurrent2.clear()
-            self.setVoltage3.clear()
-            self.setCurrent3.clear()
-            self.resistanceMeasurements.clear()
-            self.graphTime.clear()
-            self.tc1Values.clear()
-            self.tc2Values.clear()
-            self.tc3Values.clear()
-            self.tc4Values.clear()
-            self.tc5Values.clear()
-            self.tc6Values.clear()
-            self.curve1.clear()
-            self.curve2.clear()
-            self.curve3.clear()
-            self.curve4.clear()
-            self.curve5.clear()
-            self.curve6.clear()
-            self.curve7.clear()
-            self.curve8.clear()
-            self.curve9.clear()
-            self.curve10.clear()
-            self.curve11.clear()
-            self.curve12.clear()
-            self.curve13.clear()
-            self.curve14.clear()
-            self.curve15.clear()
-            self.curve16.clear()
-            self.curve17.clear()
-            self.curve18.clear()
-            self.curve19.clear()
-            self.curve20.clear()
-            self.curve21.clear()
-            self.curve22.clear()
-            self.voltageLabel.setText("0 V (raise)")
-            self.currentLabel.setText("0 A (raise)")
-            self.timeLabel.setText("0 s (raise)")
-
-            self.voltageLabel2.setText("0 V (1st dwell)")
-            self.currentLabel2.setText("0 A (1st dwell)")
-            self.timeLabel2.setText("0 s (1st dwell)")
-
-            self.voltageLabel3.setText("0 V (2nd dwell)")
-            self.currentLabel3.setText("0 A (2nd dwell)")
-            self.timeLabel3.setText("0 s (2nd dwell)")
-
-            self.meltTempLabel.setText("0 C°")
-            self.meltTimeLabel.setText("0 C°")
-            self.dwellTempLabel.setText("0 C°")
-            self.dwellTimeLabel.setText("0 C°")
-
-            self.voltageLabel.setStyleSheet("color:white;border-style: none;font-size:15px;")
-            self.currentLabel.setStyleSheet("color:white;border-style: none;font-size:15px;")
-            self.timeLabel.setStyleSheet("color:white;border-style: none;font-size:15px;")
-
-            self.voltageLabel2.setStyleSheet("color:white;border-style: none;font-size:15px;")
-            self.currentLabel2.setStyleSheet("color:white;border-style: none;font-size:15px;")
-            self.timeLabel2.setStyleSheet("color:white;border-style: none;font-size:15px;")
-
-            self.voltageLabel3.setStyleSheet("color:white;border-style: none;font-size:15px;")
-            self.currentLabel3.setStyleSheet("color:white;border-style: none;font-size:15px;")
-            self.timeLabel3.setStyleSheet("color:white;border-style: none;font-size:15px;")
-
-            print("Graph is reset")
-            return "Graph is reset"
-        except Exception as error:
-            print(error)
-            print("Reset Graph Error")
-            return "Reset Graph Error"
-
-    def calculate_resistance(self):
-        try:
-            rm = visa.ResourceManager()
-            SGX50X200D = rm.open_resource('TCPIP0::192.168.1.32::inst0::INSTR')
-            time.sleep(1)
-            SGX50X200D.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (5))
-            time.sleep(2)
-            SGX50X200D.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (10))
-            time.sleep(3)
-            temp_values = SGX50X200D.query_ascii_values(':MEASure:VOLTage?')
-            self.measured_voltage = temp_values[0]
-            time.sleep(1)
-            temp_values = SGX50X200D.query_ascii_values(':MEASure:CURRent?')
-            self.measured_current = temp_values[0]
-            self.resistanceValue = self.measured_voltage / self.measured_current
-            self.resistanceInput.setText(f"{round(self.resistanceValue,6)}")
-            time.sleep(0.5)
-            SGX50X200D.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))
-            SGX50X200D.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
-            SGX50X200D.write('*RST')
-            SGX50X200D.close()
-            rm.close()
-            print("Resistance calculated")
-            return "Resistance calculated"
-        except :
-            print("Error in resistance calculation")
-            return "Error in resistance calculation"
-
-    def calculate_parameters(self):
-        try:
-            #REFERENCE INPUTS
-            self.length = float(self.lengthInput.text())/1000
-            self.width = float(self.widthInput.text())/1000
-            self.resistance = float(self.resistanceInput.text())
-
-            #calculate area
-            self.area = self.length * self.width
-
-            #REFERENCE HEAT FLUXES AND TIMES
-            self.raiseHeatFlux = float(self.raiseHeatFluxInput.text())
-            self.dwellHeatFlux = float(self.dwellHeatFluxInput.text())
-
-            self.raiseTimeRef = int(self.raiseTimeInput.text())
-            self.dwellTimeRef = int(self.dwellTimeInput.text())
-
-            #raise calculations
-            self.raisePower = self.raiseHeatFlux * self.area
-
-            #☻current
-            self.raiseCurrent = math.ceil(math.sqrt(self.raisePower*1000/self.resistance))
-            self.curentInput.setText(f"{self.raiseCurrent}")
-
-            #voltage
-            self.raiseVoltage = math.ceil((self.raiseCurrent * self.resistance) + 10)
-            self.voltageInput.setText(f"{self.raiseVoltage}")
-
-            #time
-            self.timeInput.setText(f"{self.raiseTimeRef}")
-
-            if self.raiseVoltage > 49 :
-                self.raiseVoltage = 49
-                self.voltageInput.setText(f"{self.raiseVoltage}")
-
-                self.raiseCurrent = math.ceil((self.raiseVoltage - 10) / self.resistance)
-                self.curentInput.setText(f"{self.raiseCurrent}")
-
-                self.raisePower = self.raiseCurrent * self.raiseCurrent * self.resistance
-                self.raiseFlux = self.raisePower / self.area / 1000
-
-
-                self.raiseTime = math.ceil(self.raiseHeatFlux / self.raiseFlux * self.raiseTimeRef)
-                self.timeInput.setText(f"{self.raiseTime}")
-
-
-            #dwell calculations
-            self.dwellPower = self.dwellHeatFlux * self.area
-
-            #current
-            self.dwellCurrent = math.ceil(math.sqrt(self.dwellPower * 1000/self.resistance))
-            self.curentInput2.setText(f"{self.dwellCurrent}")
-
-            #voltage
-            self.dwellVoltage = math.ceil((self.dwellCurrent * self.resistance) + 10)
-            self.voltageInput2.setText(f"{self.dwellVoltage}")
-
-            #time
-            self.timeInput2.setText(f"{self.dwellTimeRef}")
-
-            if self.dwellVoltage > 49 :
-                self.dwellVoltage = 49
-                self.voltageInput2.setText(f"{self.dwellVoltage}")
-
-                self.dwellCurrent = math.ceil((self.dwellVoltage  - 10) / self.resistance)
-                self.curentInput2.setText(f"{self.dwellCurrent}")
-
-                self.dwellPower = self.dwellCurrent * self.dwellCurrent * self.resistance
-                self.dwellFlux = self.dwellPower / self.area / 1000
-
-                print(self.dwellPower)
-                print(self.dwellFlux)
-                print(self.raiseHeatFlux)
-                self.dwellTime = math.ceil(self.dwellHeatFlux / self.dwellFlux * self.dwellTimeRef)
-                self.timeInput2.setText(f"{self.dwellTime}")
-            self.missingDimension.setText("")
-            print("Parameters calculated")
-            return "Parameters calculated"
-        except:
-
-            self.missingDimension.setText("Missing Input !")
-            print("Missing input in coupon properties")
-            return "Missing input"
-
-    def set_parameters(self):
-        if self.soirNoInput.text() == "":
-            self.soirNoInput.setStyleSheet("border-color : red;")
-            return "Enter a SOIR number"
-
-        self.soirNumber = self.soirNoInput.text()
-        with open(f"ResWeldCycles/{self.soirNumber}.csv", 'w', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow(["Time", "Voltage","Current","TC1","TC2","TC3","TC4","TC5","TC6"])
-
-        if self.CurrDrivenCycleMode:
-
-            try:
-
-                #take inputs as integer
-                self.voltage1 = int(self.voltageInput.text())
-                self.current1 = int(self.curentInput.text())
-                self.cycleTime1 = int(self.timeInput.text())
-
-                self.voltage2 = int(self.voltageInput2.text())
-                self.current2 = int(self.curentInput2.text())
-                self.cycleTime2 = int(self.timeInput2.text())
-
-                self.voltage3 = int(self.voltageInput3.text())
-                self.current3 = int(self.curentInput3.text())
-                self.cycleTime3 = int(self.timeInput3.text())
-                self.soirNumber = self.soirNoInput.text()
-
-                self.voltageLabel.setText(f"{self.voltage1} V (raise)")
-                self.currentLabel.setText(f"{self.current1} A (raise)")
-                self.timeLabel.setText(f"{self.cycleTime1} s (raise)")
-                self.voltageLabel.setStyleSheet("color:green;border-style: none;font-size:20px;")
-                self.currentLabel.setStyleSheet("color:green;border-style: none;font-size:20px;")
-                self.timeLabel.setStyleSheet("color:green;border-style: none;font-size:20px;")
-
-                self.voltageLabel2.setText(f"{self.voltage2} V (1st dwell)")
-                self.currentLabel2.setText(f"{self.current2} A (1st dwell)")
-                self.timeLabel2.setText(f"{self.cycleTime2} s (1st dwell)")
-                self.voltageLabel2.setStyleSheet("color:green;border-style: none;font-size:20px;")
-                self.currentLabel2.setStyleSheet("color:green;border-style: none;font-size:20px;")
-                self.timeLabel2.setStyleSheet("color:green;border-style: none;font-size:20px;")
-
-                self.voltageLabel3.setText(f"{self.voltage3} V (2nd dwell)")
-                self.currentLabel3.setText(f"{self.current3} A (2nd dwell)")
-                self.timeLabel3.setText(f"{self.cycleTime3} s (2nd dwell)")
-                self.voltageLabel3.setStyleSheet("color:green;border-style: none;font-size:20px;")
-                self.currentLabel3.setStyleSheet("color:green;border-style: none;font-size:20px;")
-                self.timeLabel3.setStyleSheet("color:green;border-style: none;font-size:20px;")
-
-                #draw set parameters to graph
-                self.curve3.setData([0,450],[self.voltage1,self.voltage1])
-                self.curve4.setData([0,450],[self.current1,self.current1])
-                self.curve5.setData([0,450],[self.voltage2,self.voltage2])
-                self.curve6.setData([0,450],[self.current2,self.current2])
-                self.curve13.setData([0,450],[self.voltage3,self.voltage3])
-                self.curve14.setData([0,450],[self.current3,self.current3])
-                self.curve15.setData([self.cycleTime1,self.cycleTime1],[0,400])
-                self.curve16.setData([self.cycleTime1 + self.cycleTime2,self.cycleTime1 + self.cycleTime2],[0,400])
-                self.curve17.setData([self.cycleTime1 + self.cycleTime2 + self.cycleTime3,self.cycleTime1 + self.cycleTime2 + self.cycleTime3],[0,400])
-                self.curve18.setData([0,450],[335,335])
-                self.curve19.setData([0,450],[395,395])
-                self.curve20.setData([0,450],[190,190])
-                self.curve21.setData([0, 450], [240, 240])
-
-                print("Parameters are set")
-                return "Parameters are set"
-            except:
-
-                print("Missing input")
-                return "Missing input"
-        else:
-            try:
-                self.meltingTemperature = int(self.meltTempInput.text())
-                self.meltingTime = int(self.meltTimeInputRun.text())
-
-                self.dwellTemperature = int(self.dwellTempInput.text())
-                self.dwellTime = int(self.dwellTimeInputRun.text())
-
-                self.resistance = float(self.resistanceInput.text())
-                self.current1 = 0.65 * math.sqrt(2700/self.resistance)
-                print("Initial current : ",self.current1)
-
-                self.meltTempLabel.setText(f"Melting {self.meltingTemperature} C°")
-                self.meltTimeLabel.setText(f"Melting {self.meltingTime} s")
-                self.dwellTempLabel.setText(f"Melting {self.dwellTemperature} C°")
-                self.dwellTimeLabel.setText(f"Melting {self.dwellTime} s")
-
-                self.curve18.setData([0, 450], [self.meltingTemperature - 30 , self.meltingTemperature - 30])
-                self.curve19.setData([0, 450], [self.meltingTemperature + 30, self.meltingTemperature + 30])
-                self.curve20.setData([0, 450], [self.dwellTemperature - 30, self.dwellTemperature - 30])
-                self.curve21.setData([0, 450], [self.dwellTemperature + 30 , self.dwellTemperature + 30])
-                print(self.meltingTemperature)
-                print(self.meltingTime)
-                print(self.dwellTemperature)
-                print(self.dwellTime)
-                print("Parameters are set")
-                return "Parameters are set"
-            except:
-                print("Missing input")
-                return "Missing input"
-
-
-    def draw_graph(self):
-        if self.cycleContinue == True :
-            self.currCycleTime = time.perf_counter() - self.time1
-            self.graphTime.append(self.currCycleTime)
-
-            try:
-                self.voltage_values = self.SGX50X200D.query_ascii_values(':MEASure:VOLTage?')
-                self.measured_voltage = self.voltage_values[0]
-                self.voltageMeasurements.append(self.measured_voltage)
-                self.measuredVoltageLabel.setText(f"Voltage {round(self.measured_voltage, 2)} V")
-                self.curve1.setData(self.graphTime, self.voltageMeasurements)
-            except Exception as error:
-                self.voltageMeasurements.append(0)
-                print(error)
-
-            try:
-                self.current_values = self.SGX50X200D.query_ascii_values(':MEASure:CURRent?')
-                self.measured_current = self.current_values[0]
-                self.currentMeasurements.append(self.measured_current)
-                self.measuredCurrentLabel.setText(f"Current {round(self.measured_current, 2)} A")
-                self.curve2.setData(self.graphTime, self.currentMeasurements)
-            except Exception as error:
-                self.currentMeasurements.append(0)
-                print(error)
-
-            try:
-                self.resistanceMeasurements.append(round(self.measured_voltage / self.measured_current, 4))
-                self.curve7.setData(self.graphTime, self.resistanceMeasurements)
-                self.measuredResistanceLabel.setText(f"Resistance {round(self.measured_voltage / self.measured_current, 2)} ohm")
-
-            except Exception as error:
-                #self.resistanceMeasurements.append(self.resistanceMeasurements[len(self.resistanceMeasurements)-1])
-                print(error)
-
-            if self.measureTemperature:
-
-                try:
-                    self.tcValues = self.client.read_holding_registers(40, 6, unit=0)
-                    assert(self.tcValues.function_code < 0x80)  # test that there is not an error
-
-                    self.tc1Values.append(self.tcValues.registers[0] / 10)
-                    self.tc2Values.append(self.tcValues.registers[1] / 10)
-                    self.tc3Values.append(self.tcValues.registers[2] / 10)
-                    self.tc4Values.append(self.tcValues.registers[3] / 10)
-                    self.tc5Values.append(self.tcValues.registers[4] / 10)
-                    self.tc6Values.append(self.tcValues.registers[5] / 10)
-
-                    self.curve8.setData(self.graphTime, self.tc1Values)
-                    self.curve9.setData(self.graphTime, self.tc2Values)
-                    self.curve10.setData(self.graphTime, self.tc3Values)
-                    self.curve11.setData(self.graphTime, self.tc4Values)
-                    self.curve12.setData(self.graphTime, self.tc5Values)
-                    self.curve22.setData(self.graphTime, self.tc6Values)
-
-                except Exception as error:
-                    self.tc1Values.append(0)
-                    self.tc2Values.append(0)
-                    self.tc3Values.append(0)
-                    self.tc4Values.append(0)
-                    self.tc5Values.append(0)
-                    self.tc6Values.append(0)
-                    print(error)
-                try:
-
-                    with open(f"ResWeldCycles\{self.soirNumber}.csv", 'a+', newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerow([self.currCycleTime, self.measured_voltage, self.measured_current,self.tcValues.registers[0] / 10,self.tcValues.registers[1] / 10,self.tcValues.registers[2] / 10,self.tcValues.registers[3] / 10,self.tcValues.registers[4] / 10,self.tcValues.registers[5] / 10])
-                except Exception as error:
-                    print("tc's included",error)
-            else:
-                try:
-                    with open(f"ResWeldCycles\{self.soirNumber}.csv", 'a+', newline='') as file:
-                            writer = csv.writer(file)
-                            writer.writerow([self.currCycleTime, self.measured_voltage, self.measured_current])
-                    #print("TC1", self.tc1Values)
-                    #print("TC2", self.tc1Values)
-                    #print("TC3", self.tc1Values)
-                    #print("TC4", self.tc1Values)
-                    #print("TC5", self.tc1Values)
-                    #print("TC6", self.tc1Values)
-                except Exception as error:
-                    print("tc's not included",error,"---")
-
-        else:
-            #print("pass")
-            pass
-
-    def closeEvent(self,event):
-        self.reply = QMessageBox.question(self,"Window Close","Are you sure?", QMessageBox.Yes | QMessageBox.No)
-        if self.reply == QMessageBox.Yes:
-            self.cycleContinue = False
-            self.measureTemperature = False
-            self.win.close()
-            event.accept()
-        else:
-            event.ignore()
-
-
-
-"""
-Notes:
-    ***Resistance round edilecek****
-    self.tempCycleEnd = False run_cycle fonksiyonu içine alınacak
-    --Connection check te cihaz bağlanıtsını kapatma iptal edilebilir.
-    -EMERGENCY STOP CYCLE İPTAL ETMELİ ve PARAMETERS LABEL' LARINI BEYAZA BOYAMALI
-    1-Curve isimleri düzeltilecek
-    3-Graph renk patterni tekrar düzenlenecek
-    7-Thermocouple sayısı sınırsız olacak.
-    ***pyinstaller --onefile [script.py] --hidden-import pyvisa-py*** use this command to convert py to exe***
-"""
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'welding_design.ui'
+#
+# Created by: PyQt5 UI code generator 5.15.1
+#
+# WARNING: Any manual changes made to this file will be lost when pyuic5 is
+# run again.  Do not edit this file unless you know what you are doing.
+
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(1128, 982)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        sizePolicy.setHorizontalStretch(3)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        MainWindow.setSizePolicy(sizePolicy)
+        MainWindow.setStyleSheet("/*Copyright (c) DevSec Studio. All rights reserved.\n"
+"\n"
+"MIT License\n"
+"\n"
+"Permission is hereby granted, free of charge, to any person obtaining a copy\n"
+"of this software and associated documentation files (the \"Software\"), to deal\n"
+"in the Software without restriction, including without limitation the rights\n"
+"to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n"
+"copies of the Software, and to permit persons to whom the Software is\n"
+"furnished to do so, subject to the following conditions:\n"
+"\n"
+"The above copyright notice and this permission notice shall be included in all\n"
+"copies or substantial portions of the Software.\n"
+"\n"
+"THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n"
+"IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n"
+"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n"
+"AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n"
+"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n"
+"OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n"
+"*/\n"
+"\n"
+"/*-----QWidget-----*/\n"
+"QWidget\n"
+"{\n"
+"    background-color: #3a3a3a;\n"
+"    color: #fff;\n"
+"    selection-background-color: #b78620;\n"
+"    selection-color: #000;\n"
+"\n"
+"}\n"
+"\n"
+"QPushButton#stopButton\n"
+"{\n"
+"    color:rgb(237, 52, 53);\n"
+"}\n"
+"\n"
+"\n"
+"\n"
+"/*-----QLabel-----*/\n"
+"QLabel\n"
+"{\n"
+"    background-color: transparent;\n"
+"    color: #fff;\n"
+"    font-size : 11px;\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QMenuBar-----*/\n"
+"QMenuBar \n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));\n"
+"    border: 1px solid #000;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QMenuBar::item \n"
+"{\n"
+"    background-color: transparent;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QMenuBar::item:selected \n"
+"{\n"
+"    background-color: rgba(183, 134, 32, 20%);\n"
+"    border: 1px solid #b78620;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QMenuBar::item:pressed \n"
+"{\n"
+"    background-color: rgb(183, 134, 32);\n"
+"    border: 1px solid #b78620;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QMenu-----*/\n"
+"QMenu\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));\n"
+"    border: 1px solid #222;\n"
+"    padding: 4px;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QMenu::item\n"
+"{\n"
+"    background-color: transparent;\n"
+"    padding: 2px 20px 2px 20px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QMenu::separator\n"
+"{\n"
+"       background-color: rgb(183, 134, 32);\n"
+"    height: 1px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QMenu::item:disabled\n"
+"{\n"
+"    color: #555;\n"
+"    background-color: transparent;\n"
+"    padding: 2px 20px 2px 20px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QMenu::item:selected\n"
+"{\n"
+"    background-color: rgba(183, 134, 32, 20%);\n"
+"    border: 1px solid #b78620;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QToolBar-----*/\n"
+"QToolBar\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(69, 69, 69, 255),stop:1 rgba(58, 58, 58, 255));\n"
+"    border-top: none;\n"
+"    border-bottom: 1px solid #4f4f4f;\n"
+"    border-left: 1px solid #4f4f4f;\n"
+"    border-right: 1px solid #4f4f4f;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QToolBar::separator\n"
+"{\n"
+"    background-color: #2e2e2e;\n"
+"    width: 1px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QToolButton-----*/\n"
+"QToolButton \n"
+"{\n"
+"    background-color: transparent;\n"
+"    color: #fff;\n"
+"    padding: 5px;\n"
+"    padding-left: 8px;\n"
+"    padding-right: 8px;\n"
+"    margin-left: 1px;\n"
+"}\n"
+"\n"
+"\n"
+"QToolButton:hover\n"
+"{\n"
+"    background-color: rgba(183, 134, 32, 20%);\n"
+"    border: 1px solid #b78620;\n"
+"    color: #fff;\n"
+"    \n"
+"}\n"
+"\n"
+"\n"
+"QToolButton:pressed\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));\n"
+"    border: 1px solid #b78620;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QToolButton:checked\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));\n"
+"    border: 1px solid #222;\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QPushButton-----*/\n"
+"QPushButton\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(84, 84, 84, 255),stop:1 rgba(59, 59, 59, 255));\n"
+"    color: #ffffff;\n"
+"    min-width: 80px;\n"
+"    border-style: solid;\n"
+"    border-width: 1px;\n"
+"    border-radius: 3px;\n"
+"    border-color: #051a39;\n"
+"    padding: 5px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QPushButton::flat\n"
+"{\n"
+"    background-color: transparent;\n"
+"    border: none;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QPushButton::disabled\n"
+"{\n"
+"    background-color: #404040;\n"
+"    color: #656565;\n"
+"    border-color: #051a39;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QPushButton::hover\n"
+"{\n"
+"    background-color: rgba(183, 134, 32, 20%);\n"
+"    border: 1px solid #b78620;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QPushButton::pressed\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(74, 74, 74, 255),stop:1 rgba(49, 49, 49, 255));\n"
+"    border: 1px solid #b78620;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QPushButton::checked\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(74, 74, 74, 255),stop:1 rgba(49, 49, 49, 255));\n"
+"    border: 1px solid #222;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QLineEdit-----*/\n"
+"QLineEdit\n"
+"{\n"
+"    background-color: #131313;\n"
+"    color : #eee;\n"
+"    border: 1px solid #343434;\n"
+"    border-radius: 2px;\n"
+"    padding: 3px;\n"
+"    padding-left: 5px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QPlainTExtEdit-----*/\n"
+"QPlainTextEdit\n"
+"{\n"
+"    background-color: #131313;\n"
+"    color : #eee;\n"
+"    border: 1px solid #343434;\n"
+"    border-radius: 2px;\n"
+"    padding: 3px;\n"
+"    padding-left: 5px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QTabBar-----*/\n"
+"QTabBar::tab\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(84, 84, 84, 255),stop:1 rgba(59, 59, 59, 255));\n"
+"    color: #ffffff;\n"
+"    border-style: solid;\n"
+"    border-width: 1px;\n"
+"    border-color: #666;\n"
+"    border-bottom: none;\n"
+"    padding: 5px;\n"
+"    padding-left: 15px;\n"
+"    padding-right: 15px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTabWidget::pane \n"
+"{\n"
+"    background-color: red;\n"
+"    border: 1px solid #666;\n"
+"    top: 1px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTabBar::tab:last\n"
+"{\n"
+"    margin-right: 0; \n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTabBar::tab:first:!selected\n"
+"{\n"
+"    background-color: #0c0c0d;\n"
+"    margin-left: 0px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTabBar::tab:!selected\n"
+"{\n"
+"    color: #b1b1b1;\n"
+"    border-bottom-style: solid;\n"
+"    background-color: #0c0c0d;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTabBar::tab:selected\n"
+"{\n"
+"    margin-bottom: 0px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTabBar::tab:!selected:hover\n"
+"{\n"
+"    border-top-color: #b78620;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QComboBox-----*/\n"
+"QComboBox\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(84, 84, 84, 255),stop:1 rgba(59, 59, 59, 255));\n"
+"    border: 1px solid #000;\n"
+"    padding-left: 6px;\n"
+"    color: #ffffff;\n"
+"    height: 20px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QComboBox::disabled\n"
+"{\n"
+"    background-color: #404040;\n"
+"    color: #656565;\n"
+"    border-color: #051a39;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QComboBox:on\n"
+"{\n"
+"    background-color: #b78620;\n"
+"    color: #000;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QComboBox QAbstractItemView\n"
+"{\n"
+"    background-color: #383838;\n"
+"    color: #ffffff;\n"
+"    border: 1px solid black;\n"
+"    selection-background-color: #b78620;\n"
+"    outline: 0;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QComboBox::drop-down\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(57, 57, 57, 255),stop:1 rgba(50, 50, 50, 255));\n"
+"    subcontrol-origin: padding;\n"
+"    subcontrol-position: top right;\n"
+"    width: 15px;\n"
+"    border-left-width: 1px;\n"
+"    border-left-color: black;\n"
+"    border-left-style: solid; \n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QComboBox::down-arrow\n"
+"{\n"
+"    image: url(://arrow-down.png);\n"
+"    width: 8px;\n"
+"    height: 8px;\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QSpinBox & QDateTimeEdit-----*/\n"
+"QSpinBox,\n"
+"QDateTimeEdit \n"
+"{\n"
+"    background-color: #131313;\n"
+"    color : #eee;\n"
+"    border: 1px solid #343434;\n"
+"    padding: 3px;\n"
+"    padding-left: 5px;\n"
+"    border-radius : 2px;\n"
+"    font-size : 20px;\n"
+"}\n"
+"\n"
+"\n"
+"QSpinBox::up-button, \n"
+"QDateTimeEdit::up-button\n"
+"{\n"
+"    border-top-right-radius:2px;\n"
+"    background-color: #777777;\n"
+"    width: 16px; \n"
+"    border-width: 1px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSpinBox::up-button:hover, \n"
+"QDateTimeEdit::up-button:hover\n"
+"{\n"
+"    background-color: #585858;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSpinBox::up-button:pressed, \n"
+"QDateTimeEdit::up-button:pressed\n"
+"{\n"
+"    background-color: #252525;\n"
+"    width: 16px; \n"
+"    border-width: 1px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSpinBox::up-arrow,\n"
+"QDateTimeEdit::up-arrow\n"
+"{\n"
+"    image: url(images/up2.png);\n"
+"    width: 10px;\n"
+"    height: 10px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSpinBox::down-button, \n"
+"QDateTimeEdit::down-button\n"
+"{\n"
+"    border-bottom-right-radius:2px;\n"
+"    background-color: #777777;\n"
+"    width: 16px; \n"
+"    border-width: 1px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSpinBox::down-button:hover, \n"
+"QDateTimeEdit::down-button:hover\n"
+"{\n"
+"    background-color: #585858;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSpinBox::down-button:pressed, \n"
+"QDateTimeEdit::down-button:pressed\n"
+"{\n"
+"    background-color: #252525;\n"
+"    width: 16px; \n"
+"    border-width: 1px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSpinBox::down-arrow,\n"
+"QDateTimeEdit::down-arrow\n"
+"{\n"
+"    image: url(images/down.png);\n"
+"    width: 10px;\n"
+"    height: 10px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QGroupBox-----*/\n"
+"QGroupBox \n"
+"{\n"
+"    border: 1px solid;\n"
+"    border-color: #666666;\n"
+"    border-radius: 5px;\n"
+"    margin-top: 20px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QGroupBox::title  \n"
+"{\n"
+"    background-color: transparent;\n"
+"    color: #eee;\n"
+"    subcontrol-origin: margin;\n"
+"    padding: 5px;\n"
+"    border-top-left-radius: 3px;\n"
+"    border-top-right-radius: 3px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QHeaderView-----*/\n"
+"QHeaderView::section\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(60, 60, 60, 255),stop:1 rgba(50, 50, 50, 255));\n"
+"    border: 1px solid #000;\n"
+"    color: #fff;\n"
+"    text-align: left;\n"
+"    padding: 4px;\n"
+"    \n"
+"}\n"
+"\n"
+"\n"
+"QHeaderView::section:disabled\n"
+"{\n"
+"    background-color: #525251;\n"
+"    color: #656565;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QHeaderView::section:checked\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(60, 60, 60, 255),stop:1 rgba(50, 50, 50, 255));\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QHeaderView::section::vertical::first,\n"
+"QHeaderView::section::vertical::only-one\n"
+"{\n"
+"    border-top: 1px solid #353635;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QHeaderView::section::vertical\n"
+"{\n"
+"    border-top: 1px solid #353635;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QHeaderView::section::horizontal::first,\n"
+"QHeaderView::section::horizontal::only-one\n"
+"{\n"
+"    border-left: 1px solid #353635;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QHeaderView::section::horizontal\n"
+"{\n"
+"    border-left: 1px solid #353635;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTableCornerButton::section\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(60, 60, 60, 255),stop:1 rgba(50, 50, 50, 255));\n"
+"    border: 1px solid #000;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QTreeWidget-----*/\n"
+"QTreeView\n"
+"{\n"
+"    show-decoration-selected: 1;\n"
+"    alternate-background-color: #3a3a3a;\n"
+"    selection-color: #fff;\n"
+"    background-color: #2d2d2d;\n"
+"    border: 1px solid gray;\n"
+"    padding-top : 5px;\n"
+"    color: #fff;\n"
+"    font: 8pt;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTreeView::item:selected\n"
+"{\n"
+"    color:#fff;\n"
+"    background-color: #b78620;\n"
+"    border-radius: 0px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTreeView::item:!selected:hover\n"
+"{\n"
+"    background-color: #262626;\n"
+"    border: none;\n"
+"    color: white;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTreeView::branch:has-children:!has-siblings:closed,\n"
+"QTreeView::branch:closed:has-children:has-siblings \n"
+"{\n"
+"    image: url(://tree-closed.png);\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QTreeView::branch:open:has-children:!has-siblings,\n"
+"QTreeView::branch:open:has-children:has-siblings  \n"
+"{\n"
+"    image: url(://tree-open.png);\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QListView-----*/\n"
+"QListView \n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(83, 83, 83, 255),stop:0.293269 rgba(81, 81, 81, 255),stop:0.634615 rgba(79, 79, 79, 255),stop:1 rgba(83, 83, 83, 255));\n"
+"    border : none;\n"
+"    color: white;\n"
+"    show-decoration-selected: 1; \n"
+"    outline: 0;\n"
+"    border: 1px solid gray;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QListView::disabled \n"
+"{\n"
+"    background-color: #656565;\n"
+"    color: #1b1b1b;\n"
+"    border: 1px solid #656565;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QListView::item \n"
+"{\n"
+"    background-color: #2d2d2d;\n"
+"    padding: 1px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QListView::item:alternate \n"
+"{\n"
+"    background-color: #3a3a3a;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QListView::item:selected \n"
+"{\n"
+"    background-color: #b78620;\n"
+"    border: 1px solid #b78620;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QListView::item:selected:!active \n"
+"{\n"
+"    background-color: #b78620;\n"
+"    border: 1px solid #b78620;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QListView::item:selected:active \n"
+"{\n"
+"    background-color: #b78620;\n"
+"    border: 1px solid #b78620;\n"
+"    color: #fff;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QListView::item:hover {\n"
+"    background-color: #262626;\n"
+"    border: none;\n"
+"    color: white;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QCheckBox-----*/\n"
+"QCheckBox\n"
+"{\n"
+"    background-color: transparent;\n"
+"    color: lightgray;\n"
+"    border: none;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QCheckBox::indicator\n"
+"{\n"
+"    background-color: #323232;\n"
+"    border: 1px solid darkgray;\n"
+"    width: 12px;\n"
+"    height: 12px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QCheckBox::indicator:checked\n"
+"{\n"
+"    image:url(\"./ressources/check.png\");\n"
+"    background-color: #b78620;\n"
+"    border: 1px solid #3a546e;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QCheckBox::indicator:unchecked:hover\n"
+"{\n"
+"    border: 1px solid #b78620; \n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QCheckBox::disabled\n"
+"{\n"
+"    color: #656565;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QCheckBox::indicator:disabled\n"
+"{\n"
+"    background-color: #656565;\n"
+"    color: #656565;\n"
+"    border: 1px solid #656565;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QRadioButton-----*/\n"
+"QRadioButton \n"
+"{\n"
+"    color: lightgray;\n"
+"    background-color: transparent;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QRadioButton::indicator::unchecked:hover \n"
+"{\n"
+"    background-color: lightgray;\n"
+"    border: 2px solid #b78620;\n"
+"    border-radius: 6px;\n"
+"}\n"
+"\n"
+"\n"
+"QRadioButton::indicator::checked \n"
+"{\n"
+"    border: 2px solid #b78620;\n"
+"    border-radius: 6px;\n"
+"    background-color: rgba(183,134,32,20%);  \n"
+"    width: 9px; \n"
+"    height: 9px; \n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QSlider-----*/\n"
+"QSlider::groove:horizontal \n"
+"{\n"
+"    background-color: transparent;\n"
+"    height: 3px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSlider::sub-page:horizontal \n"
+"{\n"
+"    background-color: #b78620;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSlider::add-page:horizontal \n"
+"{\n"
+"    background-color: #131313;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSlider::handle:horizontal \n"
+"{\n"
+"    background-color: #b78620;\n"
+"    width: 14px;\n"
+"    margin-top: -6px;\n"
+"    margin-bottom: -6px;\n"
+"    border-radius: 6px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSlider::handle:horizontal:hover \n"
+"{\n"
+"    background-color: #d89e25;\n"
+"    border-radius: 6px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSlider::sub-page:horizontal:disabled \n"
+"{\n"
+"    background-color: #bbb;\n"
+"    border-color: #999;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSlider::add-page:horizontal:disabled \n"
+"{\n"
+"    background-color: #eee;\n"
+"    border-color: #999;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QSlider::handle:horizontal:disabled \n"
+"{\n"
+"    background-color: #eee;\n"
+"    border: 1px solid #aaa;\n"
+"    border-radius: 3px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QScrollBar-----*/\n"
+"QScrollBar:horizontal\n"
+"{\n"
+"    border: 1px solid #222222;\n"
+"    background-color: #3d3d3d;\n"
+"    height: 15px;\n"
+"    margin: 0px 16px 0 16px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::handle:horizontal\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(97, 97, 97, 255),stop:1 rgba(90, 90, 90, 255));\n"
+"    border: 1px solid #2d2d2d;\n"
+"    min-height: 20px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::add-line:horizontal\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(97, 97, 97, 255),stop:1 rgba(90, 90, 90, 255));\n"
+"    border: 1px solid #2d2d2d;\n"
+"    width: 15px;\n"
+"    subcontrol-position: right;\n"
+"    subcontrol-origin: margin;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::sub-line:horizontal\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(97, 97, 97, 255),stop:1 rgba(90, 90, 90, 255));\n"
+"    border: 1px solid #2d2d2d;\n"
+"    width: 15px;\n"
+"    subcontrol-position: left;\n"
+"    subcontrol-origin: margin;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::right-arrow:horizontal\n"
+"{\n"
+"    image: url(://arrow-right.png);\n"
+"    width: 6px;\n"
+"    height: 6px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::left-arrow:horizontal\n"
+"{\n"
+"    image: url(://arrow-left.png);\n"
+"    width: 6px;\n"
+"    height: 6px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal\n"
+"{\n"
+"    background: none;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar:vertical\n"
+"{\n"
+"    background-color: #3d3d3d;\n"
+"    width: 16px;\n"
+"    border: 1px solid #2d2d2d;\n"
+"    margin: 16px 0px 16px 0px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::handle:vertical\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(97, 97, 97, 255),stop:1 rgba(90, 90, 90, 255));\n"
+"    border: 1px solid #2d2d2d;\n"
+"    min-height: 20px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::add-line:vertical\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(97, 97, 97, 255),stop:1 rgba(90, 90, 90, 255));\n"
+"    border: 1px solid #2d2d2d;\n"
+"    height: 15px;\n"
+"    subcontrol-position: bottom;\n"
+"    subcontrol-origin: margin;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::sub-line:vertical\n"
+"{\n"
+"    background-color: qlineargradient(spread:repeat, x1:1, y1:0, x2:1, y2:1, stop:0 rgba(97, 97, 97, 255),stop:1 rgba(90, 90, 90, 255));\n"
+"    border: 1px solid #2d2d2d;\n"
+"    height: 15px;\n"
+"    subcontrol-position: top;\n"
+"    subcontrol-origin: margin;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::up-arrow:vertical\n"
+"{\n"
+"    image: url(://arrow-up.png);\n"
+"    width: 6px;\n"
+"    height: 6px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::down-arrow:vertical\n"
+"{\n"
+"    image: url(://arrow-down.png);\n"
+"    width: 6px;\n"
+"    height: 6px;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical\n"
+"{\n"
+"    background: none;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"/*-----QProgressBar-----*/\n"
+"QProgressBar\n"
+"{\n"
+"    border: 1px solid #666666;\n"
+"    text-align: center;\n"
+"    color: #000;\n"
+"    font-weight: bold;\n"
+"\n"
+"}\n"
+"\n"
+"\n"
+"QProgressBar::chunk\n"
+"{\n"
+"    background-color: #b78620;\n"
+"    width: 30px;\n"
+"    margin: 0.5px;\n"
+"\n"
+"}\n"
+"")
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
+        self.tabWidget.setObjectName("tabWidget")
+        self.tab = QtWidgets.QWidget()
+        self.tab.setObjectName("tab")
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.tab)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.gridLayout = QtWidgets.QGridLayout()
+        self.gridLayout.setContentsMargins(-1, -1, -1, 0)
+        self.gridLayout.setSpacing(5)
+        self.gridLayout.setObjectName("gridLayout")
+        self.lineEdit_3 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_3.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_3.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_3.setObjectName("lineEdit_3")
+        self.gridLayout.addWidget(self.lineEdit_3, 3, 1, 1, 1, QtCore.Qt.AlignLeft)
+        self.lineEdit = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit.setObjectName("lineEdit")
+        self.gridLayout.addWidget(self.lineEdit, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
+        self.label_2 = QtWidgets.QLabel(self.tab)
+        font = QtGui.QFont()
+        font.setPointSize(-1)
+        self.label_2.setFont(font)
+        self.label_2.setObjectName("label_2")
+        self.gridLayout.addWidget(self.label_2, 0, 0, 1, 1)
+        self.lineEdit_2 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_2.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_2.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.gridLayout.addWidget(self.lineEdit_2, 2, 1, 1, 1, QtCore.Qt.AlignLeft)
+        self.pushButton = QtWidgets.QPushButton(self.tab)
+        self.pushButton.setObjectName("pushButton")
+        self.gridLayout.addWidget(self.pushButton, 0, 2, 1, 1)
+        self.label = QtWidgets.QLabel(self.tab)
+        font = QtGui.QFont()
+        font.setPointSize(-1)
+        self.label.setFont(font)
+        self.label.setObjectName("label")
+        self.gridLayout.addWidget(self.label, 2, 0, 1, 1)
+        self.label_3 = QtWidgets.QLabel(self.tab)
+        font = QtGui.QFont()
+        font.setPointSize(-1)
+        self.label_3.setFont(font)
+        self.label_3.setObjectName("label_3")
+        self.gridLayout.addWidget(self.label_3, 3, 0, 1, 1)
+        self.verticalLayout.addLayout(self.gridLayout)
+        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.verticalLayout.addItem(spacerItem)
+        self.line_2 = QtWidgets.QFrame(self.tab)
+        self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_2.setObjectName("line_2")
+        self.verticalLayout.addWidget(self.line_2)
+        self.gridLayout_2 = QtWidgets.QGridLayout()
+        self.gridLayout_2.setObjectName("gridLayout_2")
+        self.label_8 = QtWidgets.QLabel(self.tab)
+        self.label_8.setObjectName("label_8")
+        self.gridLayout_2.addWidget(self.label_8, 2, 2, 1, 1)
+        self.lineEdit_10 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_10.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_10.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_10.setObjectName("lineEdit_10")
+        self.gridLayout_2.addWidget(self.lineEdit_10, 1, 6, 1, 1)
+        self.label_12 = QtWidgets.QLabel(self.tab)
+        self.label_12.setObjectName("label_12")
+        self.gridLayout_2.addWidget(self.label_12, 3, 5, 1, 1)
+        self.lineEdit_8 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_8.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_8.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_8.setObjectName("lineEdit_8")
+        self.gridLayout_2.addWidget(self.lineEdit_8, 2, 3, 1, 1)
+        self.label_10 = QtWidgets.QLabel(self.tab)
+        self.label_10.setObjectName("label_10")
+        self.gridLayout_2.addWidget(self.label_10, 1, 5, 1, 1)
+        self.lineEdit_7 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_7.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_7.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_7.setObjectName("lineEdit_7")
+        self.gridLayout_2.addWidget(self.lineEdit_7, 1, 3, 1, 1)
+        self.label_6 = QtWidgets.QLabel(self.tab)
+        self.label_6.setObjectName("label_6")
+        self.gridLayout_2.addWidget(self.label_6, 3, 0, 1, 1)
+        self.lineEdit_9 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_9.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_9.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_9.setObjectName("lineEdit_9")
+        self.gridLayout_2.addWidget(self.lineEdit_9, 3, 3, 1, 1)
+        self.label_9 = QtWidgets.QLabel(self.tab)
+        self.label_9.setObjectName("label_9")
+        self.gridLayout_2.addWidget(self.label_9, 3, 2, 1, 1)
+        self.lineEdit_12 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_12.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_12.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_12.setObjectName("lineEdit_12")
+        self.gridLayout_2.addWidget(self.lineEdit_12, 3, 6, 1, 1)
+        self.lineEdit_5 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_5.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_5.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_5.setObjectName("lineEdit_5")
+        self.gridLayout_2.addWidget(self.lineEdit_5, 2, 1, 1, 1)
+        self.label_5 = QtWidgets.QLabel(self.tab)
+        self.label_5.setObjectName("label_5")
+        self.gridLayout_2.addWidget(self.label_5, 2, 0, 1, 1)
+        self.label_7 = QtWidgets.QLabel(self.tab)
+        self.label_7.setObjectName("label_7")
+        self.gridLayout_2.addWidget(self.label_7, 1, 2, 1, 1)
+        self.label_11 = QtWidgets.QLabel(self.tab)
+        self.label_11.setObjectName("label_11")
+        self.gridLayout_2.addWidget(self.label_11, 2, 5, 1, 1)
+        self.label_4 = QtWidgets.QLabel(self.tab)
+        self.label_4.setObjectName("label_4")
+        self.gridLayout_2.addWidget(self.label_4, 1, 0, 1, 1)
+        self.lineEdit_11 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_11.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_11.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_11.setObjectName("lineEdit_11")
+        self.gridLayout_2.addWidget(self.lineEdit_11, 2, 6, 1, 1)
+        self.lineEdit_6 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_6.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_6.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_6.setObjectName("lineEdit_6")
+        self.gridLayout_2.addWidget(self.lineEdit_6, 3, 1, 1, 1)
+        self.lineEdit_4 = QtWidgets.QLineEdit(self.tab)
+        self.lineEdit_4.setMaximumSize(QtCore.QSize(150, 22))
+        self.lineEdit_4.setAlignment(QtCore.Qt.AlignBottom|QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft)
+        self.lineEdit_4.setObjectName("lineEdit_4")
+        self.gridLayout_2.addWidget(self.lineEdit_4, 1, 1, 1, 1)
+        self.verticalLayout.addLayout(self.gridLayout_2)
+        self.set_parameters = QtWidgets.QPushButton(self.tab)
+        self.set_parameters.setObjectName("set_parameters")
+        self.verticalLayout.addWidget(self.set_parameters)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.verticalLayout.addItem(spacerItem1)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.gridLayout_3 = QtWidgets.QGridLayout()
+        self.gridLayout_3.setObjectName("gridLayout_3")
+        self.label_16 = QtWidgets.QLabel(self.tab)
+        self.label_16.setObjectName("label_16")
+        self.gridLayout_3.addWidget(self.label_16, 0, 1, 1, 1)
+        self.label_20 = QtWidgets.QLabel(self.tab)
+        self.label_20.setObjectName("label_20")
+        self.gridLayout_3.addWidget(self.label_20, 1, 2, 1, 1)
+        self.label_15 = QtWidgets.QLabel(self.tab)
+        self.label_15.setObjectName("label_15")
+        self.gridLayout_3.addWidget(self.label_15, 2, 0, 1, 1)
+        self.label_14 = QtWidgets.QLabel(self.tab)
+        self.label_14.setObjectName("label_14")
+        self.gridLayout_3.addWidget(self.label_14, 1, 0, 1, 1)
+        self.label_21 = QtWidgets.QLabel(self.tab)
+        self.label_21.setObjectName("label_21")
+        self.gridLayout_3.addWidget(self.label_21, 2, 2, 1, 1)
+        self.label_13 = QtWidgets.QLabel(self.tab)
+        self.label_13.setObjectName("label_13")
+        self.gridLayout_3.addWidget(self.label_13, 0, 0, 1, 1)
+        self.label_19 = QtWidgets.QLabel(self.tab)
+        self.label_19.setObjectName("label_19")
+        self.gridLayout_3.addWidget(self.label_19, 0, 2, 1, 1)
+        self.label_18 = QtWidgets.QLabel(self.tab)
+        self.label_18.setObjectName("label_18")
+        self.gridLayout_3.addWidget(self.label_18, 2, 1, 1, 1)
+        self.label_17 = QtWidgets.QLabel(self.tab)
+        self.label_17.setObjectName("label_17")
+        self.gridLayout_3.addWidget(self.label_17, 1, 1, 1, 1)
+        self.horizontalLayout.addLayout(self.gridLayout_3)
+        self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_4.setSizeConstraint(QtWidgets.QLayout.SetMaximumSize)
+        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
+        self.run_cycle_button = QtWidgets.QPushButton(self.tab)
+        self.run_cycle_button.setMinimumSize(QtCore.QSize(92, 25))
+        self.run_cycle_button.setMaximumSize(QtCore.QSize(16777215, 29))
+        self.run_cycle_button.setStyleSheet("")
+        self.run_cycle_button.setObjectName("run_cycle_button")
+        self.horizontalLayout_4.addWidget(self.run_cycle_button)
+        self.horizontalLayout.addLayout(self.horizontalLayout_4)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.horizontalLayout_2.addLayout(self.verticalLayout)
+        spacerItem2 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.horizontalLayout_2.addItem(spacerItem2)
+        spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        self.horizontalLayout_2.addItem(spacerItem3)
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.emergency_button = QtWidgets.QPushButton(self.tab)
+        self.emergency_button.setMinimumSize(QtCore.QSize(92, 29))
+        self.emergency_button.setBaseSize(QtCore.QSize(0, 0))
+        self.emergency_button.setObjectName("emergency_button")
+        self.verticalLayout_2.addWidget(self.emergency_button, 0, QtCore.Qt.AlignVCenter)
+        self.progressBar = QtWidgets.QProgressBar(self.tab)
+        self.progressBar.setProperty("value", 24)
+        self.progressBar.setObjectName("progressBar")
+        self.verticalLayout_2.addWidget(self.progressBar, 0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+        self.label_23 = QtWidgets.QLabel(self.tab)
+        self.label_23.setObjectName("label_23")
+        self.verticalLayout_2.addWidget(self.label_23, 0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignBottom)
+        self.gridLayout_4 = QtWidgets.QGridLayout()
+        self.gridLayout_4.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
+        self.gridLayout_4.setObjectName("gridLayout_4")
+        self.label_39 = QtWidgets.QLabel(self.tab)
+        self.label_39.setObjectName("label_39")
+        self.gridLayout_4.addWidget(self.label_39, 3, 1, 1, 1)
+        self.label_40 = QtWidgets.QLabel(self.tab)
+        self.label_40.setObjectName("label_40")
+        self.gridLayout_4.addWidget(self.label_40, 4, 1, 1, 1)
+        self.measure_temps = QtWidgets.QPushButton(self.tab)
+        self.measure_temps.setObjectName("measure_temps")
+        self.gridLayout_4.addWidget(self.measure_temps, 5, 0, 1, 1)
+        self.label_36 = QtWidgets.QLabel(self.tab)
+        self.label_36.setObjectName("label_36")
+        self.gridLayout_4.addWidget(self.label_36, 0, 1, 1, 1)
+        self.label_31 = QtWidgets.QLabel(self.tab)
+        self.label_31.setObjectName("label_31")
+        self.gridLayout_4.addWidget(self.label_31, 0, 0, 1, 1)
+        self.label_38 = QtWidgets.QLabel(self.tab)
+        self.label_38.setObjectName("label_38")
+        self.gridLayout_4.addWidget(self.label_38, 2, 1, 1, 1)
+        self.label_32 = QtWidgets.QLabel(self.tab)
+        self.label_32.setObjectName("label_32")
+        self.gridLayout_4.addWidget(self.label_32, 1, 0, 1, 1)
+        self.label_35 = QtWidgets.QLabel(self.tab)
+        self.label_35.setObjectName("label_35")
+        self.gridLayout_4.addWidget(self.label_35, 4, 0, 1, 1)
+        self.stop_temps = QtWidgets.QPushButton(self.tab)
+        self.stop_temps.setObjectName("stop_temps")
+        self.gridLayout_4.addWidget(self.stop_temps, 5, 1, 1, 1)
+        self.label_33 = QtWidgets.QLabel(self.tab)
+        self.label_33.setObjectName("label_33")
+        self.gridLayout_4.addWidget(self.label_33, 2, 0, 1, 1)
+        self.label_34 = QtWidgets.QLabel(self.tab)
+        self.label_34.setObjectName("label_34")
+        self.gridLayout_4.addWidget(self.label_34, 3, 0, 1, 1)
+        self.label_37 = QtWidgets.QLabel(self.tab)
+        self.label_37.setObjectName("label_37")
+        self.gridLayout_4.addWidget(self.label_37, 1, 1, 1, 1)
+        self.verticalLayout_2.addLayout(self.gridLayout_4)
+        self.horizontalLayout_2.addLayout(self.verticalLayout_2)
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.label_24 = QtWidgets.QLabel(self.tab)
+        self.label_24.setText("")
+        self.label_24.setPixmap(QtGui.QPixmap("weld-linux/images/logo.svg"))
+        self.label_24.setObjectName("label_24")
+        self.verticalLayout_4.addWidget(self.label_24, 0, QtCore.Qt.AlignTop)
+        self.gridLayout_6 = QtWidgets.QGridLayout()
+        self.gridLayout_6.setObjectName("gridLayout_6")
+        self.pushButton_2 = QtWidgets.QPushButton(self.tab)
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.gridLayout_6.addWidget(self.pushButton_2, 0, 0, 1, 1)
+        self.pushButton_3 = QtWidgets.QPushButton(self.tab)
+        self.pushButton_3.setObjectName("pushButton_3")
+        self.gridLayout_6.addWidget(self.pushButton_3, 1, 0, 1, 1)
+        self.verticalLayout_4.addLayout(self.gridLayout_6)
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.label_25 = QtWidgets.QLabel(self.tab)
+        self.label_25.setObjectName("label_25")
+        self.verticalLayout_5.addWidget(self.label_25, 0, QtCore.Qt.AlignHCenter)
+        self.gridLayout_5 = QtWidgets.QGridLayout()
+        self.gridLayout_5.setObjectName("gridLayout_5")
+        self.label_27 = QtWidgets.QLabel(self.tab)
+        self.label_27.setObjectName("label_27")
+        self.gridLayout_5.addWidget(self.label_27, 1, 0, 1, 1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+        self.label_26 = QtWidgets.QLabel(self.tab)
+        self.label_26.setObjectName("label_26")
+        self.gridLayout_5.addWidget(self.label_26, 0, 0, 1, 1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+        self.label_28 = QtWidgets.QLabel(self.tab)
+        self.label_28.setObjectName("label_28")
+        self.gridLayout_5.addWidget(self.label_28, 2, 0, 1, 1, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+        self.verticalLayout_5.addLayout(self.gridLayout_5)
+        self.verticalLayout_4.addLayout(self.verticalLayout_5)
+        self.label_22 = QtWidgets.QLabel(self.tab)
+        self.label_22.setObjectName("label_22")
+        self.verticalLayout_4.addWidget(self.label_22, 0, QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+        self.horizontalLayout_2.addLayout(self.verticalLayout_4)
+        self.tabWidget.addTab(self.tab, "")
+        self.tab_2 = QtWidgets.QWidget()
+        self.tab_2.setObjectName("tab_2")
+        self.tabWidget.addTab(self.tab_2, "")
+        self.horizontalLayout_3.addWidget(self.tabWidget)
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1128, 24))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+        self.toolBar = QtWidgets.QToolBar(MainWindow)
+        self.toolBar.setObjectName("toolBar")
+        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+        self.toolBar_2 = QtWidgets.QToolBar(MainWindow)
+        self.toolBar_2.setObjectName("toolBar_2")
+        MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar_2)
+
+        self.retranslateUi(MainWindow)
+        self.tabWidget.setCurrentIndex(0)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.label_2.setText(_translate("MainWindow", "Resistance(ohm) : "))
+        self.pushButton.setText(_translate("MainWindow", "CALCULATE RESISTANCE"))
+        self.label.setText(_translate("MainWindow", "Mesh width(mm):"))
+        self.label_3.setText(_translate("MainWindow", "Mesh length(mm):"))
+        self.label_8.setText(_translate("MainWindow", "Current(dwell):"))
+        self.label_12.setText(_translate("MainWindow", "Time(dwell):"))
+        self.label_10.setText(_translate("MainWindow", "Voltage(dwell):"))
+        self.label_6.setText(_translate("MainWindow", "Time(raise):"))
+        self.label_9.setText(_translate("MainWindow", "Time(melt):"))
+        self.label_5.setText(_translate("MainWindow", "Current(raise):"))
+        self.label_7.setText(_translate("MainWindow", "Voltage(melt):"))
+        self.label_11.setText(_translate("MainWindow", "Current(melt):"))
+        self.label_4.setText(_translate("MainWindow", "Voltage(raise):"))
+        self.set_parameters.setText(_translate("MainWindow", "SET PARAMETERS"))
+        self.label_16.setText(_translate("MainWindow", "TextLabel"))
+        self.label_20.setText(_translate("MainWindow", "TextLabel"))
+        self.label_15.setText(_translate("MainWindow", "TextLabel"))
+        self.label_14.setText(_translate("MainWindow", "TextLabel"))
+        self.label_21.setText(_translate("MainWindow", "TextLabel"))
+        self.label_13.setText(_translate("MainWindow", "TextLabel"))
+        self.label_19.setText(_translate("MainWindow", "TextLabel"))
+        self.label_18.setText(_translate("MainWindow", "TextLabel"))
+        self.label_17.setText(_translate("MainWindow", "TextLabel"))
+        self.run_cycle_button.setText(_translate("MainWindow", "RUN CYCLE"))
+        self.emergency_button.setText(_translate("MainWindow", "STOP CYCLE"))
+        self.label_23.setText(_translate("MainWindow", "TEMPERATURE MEASUREMENTS"))
+        self.label_23.setStyleSheet("font : 15px; color:blue;")
+        self.label_39.setText(_translate("MainWindow", "TC9"))
+        self.label_40.setText(_translate("MainWindow", "TextLabel"))
+        self.measure_temps.setText(_translate("MainWindow", "MEASURE\n"
+" TEMPERATURES"))
+        self.label_36.setText(_translate("MainWindow", "TC6"))
+        self.label_31.setText(_translate("MainWindow", "TC1"))
+        self.label_38.setText(_translate("MainWindow", "TC8"))
+        self.label_32.setText(_translate("MainWindow", "TC2"))
+        self.label_35.setText(_translate("MainWindow", "TC5"))
+        self.stop_temps.setText(_translate("MainWindow", "STOP \n"
+" MEASURING"))
+        self.label_33.setText(_translate("MainWindow", "TC3"))
+        self.label_34.setText(_translate("MainWindow", "TC4"))
+        self.label_37.setText(_translate("MainWindow", "TC7"))
+        self.pushButton_2.setText(_translate("MainWindow", "CONNECTING TO POWER SUPPLY..."))
+        self.pushButton_3.setText(_translate("MainWindow", "CONNECTING TO DATA LOGGER..."))
+        self.label_25.setText(_translate("MainWindow", "POWER SUPPLY VALUES"))
+        self.label_27.setText(_translate("MainWindow", "Current 0 ampers"))
+        self.label_26.setText(_translate("MainWindow", "Voltage 0 Volts"))
+        self.label_28.setText(_translate("MainWindow", "Resistance 0 ohm"))
+        self.label_22.setText(_translate("MainWindow", "OLD CYCLES"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "User"))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Administrator"))
+        self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
+        self.toolBar_2.setWindowTitle(_translate("MainWindow", "toolBar_2"))
