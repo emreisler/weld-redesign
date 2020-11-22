@@ -61,7 +61,6 @@ class Weld:
                 self.ui_object.power_supply_connection.setStyleSheet("background-color: red")
                 self.ui_object.power_supply_connection.setText(f"CONNECTING TO \nPOWER SUPPLY...")
 
-
             try:
                 self.PLC.connect()
                 self.tcValues = self.PLC.read_holding_registers(40, 10, unit=0)
@@ -73,9 +72,10 @@ class Weld:
                 self.ui_object.temperature_connection.setStyleSheet("background-color: red")
                 self.ui_object.temperature_connection.setText(f"CONNECTING TO \nPLC...")
                 print("Connection to PLC error : ", error)
-            sleep(5)
+                break
+            
 
-        raise NotImplementedError
+        print("Connections are checked")
 
     def measure_resistance_thread(self):
         if self.ui_object.simulation_mode:
@@ -108,15 +108,16 @@ class Weld:
         raise NotImplementedError
     def set_parameters(self):
         try:
-            self.voltage1 = float(self.ui_object.voltage1_input)
-            self.current1 = float(self.ui_object.current1_input)
-            self.cycle_time1 = float(self.ui_object.time1_input)
-            self.voltage2 = float(self.ui_object.voltage2_input)
-            self.current2 = float(self.ui_object.current2_input)
-            self.cycle_time2 = float(self.ui_object.time2_input)
-            self.voltage3 = float(self.ui_object.voltage3_input)
-            self.current3 = float(self.ui_object.current3_input)
-            self.cycle_time3 = float(self.ui_object.time3_input)
+            self.voltage1 = float(self.ui_object.voltage1_input.text())
+            self.current1 = float(self.ui_object.current1_input.text())
+            self.cycle_time1 = float(self.ui_object.time1_input.text())
+            self.voltage2 = float(self.ui_object.voltage2_input.text())
+            self.current2 = float(self.ui_object.current2_input_2.text())
+            self.cycle_time2 = float(self.ui_object.time2_input.text())
+            self.voltage3 = float(self.ui_object.voltage3_input.text())
+            self.current3 = float(self.ui_object.current3_input.text())
+            self.cycle_time3 = float(self.ui_object.time3_input.text())
+            print("Parameters are set")
         except Exception as error:
             print("Error while setting parameters : ",error)
 
@@ -135,40 +136,52 @@ class Weld:
             self.step1_finished = True
             self.step2_finished = True
             self.step3_finished = True
+            self.step_name = "Raising(1st) Step"
+            self.total_cycle_time = self.cycle_time1 + self.cycle_time2 + self.cycle_time3
 
             #Start the cycle loop
             while not self.cycle_end :
-
+            
                 #Get current time each loop
                 self.current_cycle_time = perf_counter()
-
+                
                 self.cycle_time = self.current_cycle_time - self.time1
+                self.remaining_cycle_time = self.total_cycle_time - self.cycle_time
+                self.progressBarValue = self.remaining_cycle_time / self.total_cycle_time * 100
                 self.ui_object.cycleInfo1.setText(f"Cycle running...{self.step_name}\nRemaining time {round(self.cycle_time1 + self.cycle_time2 + self.cycle_time3 - self.cycle_time, 2)} seconds.. ")
+                self.ui_object.progressBar.setValue(self.progressBarValue)
 
+                """
+                try:
+                    self.ui_object.progressBar.setValue(self.cycle_time / (self.cycle_time1 + self.cycle_time2 +
+                        self.cycle_time3) * 100)
+                except Exception as error:
+                    print("Progress bar error: ", error)
+                """
                 #Check time every loop and jump to second step parameters if cycletime exceeds set time for 1st step
-                if self.cycle_time > self.ui_object.cycle_time1 and self.step1_finished:
+                if self.cycle_time > self.cycle_time1 and self.step1_finished:
                     try:
                         #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.voltage2))
                         #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.current2))
-                        self.stepName = "2nd Step (dwell at melting)"
+                        self.step_name = "2nd Step (dwell at melting)"
                         self.step1_finished = False
                         print("Jumped to step2, voltage2,current2")
                     except Exception as error:
                         print("Error while jumping to step2 : ", error)
 
                 # Check time every loop and jump to third step parameters if cycletime exceeds set time for 2nd step
-                if self.cycle_time > self.ui_object.cycle_time1 + self.ui_object.cycle_time2  and self.step2_finished :
+                if self.cycle_time > self.cycle_time1 + self.cycle_time2  and self.step2_finished :
                     try:
                         #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.voltage3))
                         #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.current3))
-                        self.stepName = "3rd step (dwell at recrystallization)"
+                        self.step_name = "3rd step (dwell at recrystallization)"
                         self.step2_finished = False
                         print("Jumped to step3, voltage3,current3")
                     except Exception as error:
                         print("Error while jumping to step3 :",error)
 
                 # Check time every loop and jump to third step parameters if cycletime exceeds set time for 2nd step
-                if self.cycle_time > self.ui_object.cycle_time1 + self.ui_object.cycle_time2 + self.ui_object.cycle_time3 and self.step3_finished:
+                if self.cycle_time > self.cycle_time1 + self.cycle_time2 + self.cycle_time3 and self.step3_finished:
                     try:
                         #self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
                         #self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))
@@ -202,6 +215,7 @@ class Weld:
             self.step1_finished = True
             self.step2_finished = True
             self.step3_finished = True
+            self.step_name = "Raise(1st) Step"
 
             #Start the cycle loop
             while not self.cycle_end :
@@ -210,14 +224,14 @@ class Weld:
                 self.current_cycle_time = time.perf_counter()
 
                 self.cycle_time = self.current_cycle_time - self.time1
-                #self.infoLabel.setText(f"Cycle running...{self.stepName}\nRemaining time {round(self.cycleTime1 + self.cycleTime2 + self.cycleTime3 - self.cycleTime, 2)} seconds.. ")
+                #self.infoLabel.setText(f"Cycle running...{self.step_name}\nRemaining time {round(self.cycleTime1 + self.cycleTime2 + self.cycleTime3 - self.cycleTime, 2)} seconds.. ")
 
                 #Check time every loop and jump to second step parameters if cycletime exceeds set time for 1st step
                 if self.cycle_time > self.ui_object.cycleTime1 and self.step1_finished:
                     try:
                         self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.voltage2))
                         self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.current2))
-                        self.stepName = "2nd Step (dwell at melting)"
+                        self.step_name = "2nd Step (dwell at melting)"
                         self.step1_finished = False
                         print("Jumped to step2, voltage2,current2")
                     except Exception as error:
@@ -228,7 +242,7 @@ class Weld:
                     try:
                         self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.voltage3))
                         self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (self.ui_object.current3))
-                        self.stepName = "3rd step (dwell at recrystallization)"
+                        self.step_name = "3rd step (dwell at recrystallization)"
                         self.step2_finished = False
                         print("Jumped to step3, voltage3,current3")
                     except Exception as error:

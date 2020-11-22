@@ -18,6 +18,7 @@ def main():
     user_interface.run_cycle_button.clicked.connect(welder.run_cycle)
     user_interface.emergency_button.clicked.connect(welder.emergency_stop)
     welder.connect()
+    user_interface.set_parameters_button.clicked.connect(welder.set_parameters)
     user_interface.showMaximized()
 
     app.exec_()
