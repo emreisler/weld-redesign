@@ -9,7 +9,6 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QMainWindow
 
 
 class Ui_MainWindow(object):
@@ -1092,12 +1091,12 @@ class Ui_MainWindow(object):
         self.label_41.setObjectName("label_41")
         self.gridLayout_3.addWidget(self.label_41, 3, 2, 1, 1, QtCore.Qt.AlignHCenter)
         self.horizontalLayout.addLayout(self.gridLayout_3)
-        self.run_cycle_button = QtWidgets.QPushButton(self.user)
-        self.run_cycle_button.setMinimumSize(QtCore.QSize(92, 100))
-        self.run_cycle_button.setMaximumSize(QtCore.QSize(16777215, 29))
-        self.run_cycle_button.setStyleSheet("")
-        self.run_cycle_button.setObjectName("run_cycle_button")
-        self.horizontalLayout.addWidget(self.run_cycle_button)
+        self.run_cycle = QtWidgets.QPushButton(self.user)
+        self.run_cycle.setMinimumSize(QtCore.QSize(92, 100))
+        self.run_cycle.setMaximumSize(QtCore.QSize(16777215, 29))
+        self.run_cycle.setStyleSheet("")
+        self.run_cycle.setObjectName("run_cycle")
+        self.horizontalLayout.addWidget(self.run_cycle)
         self.gridLayout.addLayout(self.horizontalLayout, 2, 0, 1, 1)
         self.verticalLayout_7 = QtWidgets.QVBoxLayout()
         self.verticalLayout_7.setObjectName("verticalLayout_7")
@@ -1408,7 +1407,7 @@ class Ui_MainWindow(object):
         self.label_14.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">0 Volt</span></p></body></html>"))
         self.label_21.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">0 ampers</span></p></body></html>"))
         self.label_41.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">0 second</span></p></body></html>"))
-        self.run_cycle_button.setText(_translate("MainWindow", "RUN CYCLE"))
+        self.run_cycle.setText(_translate("MainWindow", "RUN CYCLE"))
         self.label_25.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; color:#1e92ca;\">POWER SUPPLY VALUES</span></p></body></html>"))
         self.label_26.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">Voltage 0 Volts</span></p></body></html>"))
         self.label_27.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">Voltage 0 Volts</span></p></body></html>"))
@@ -1451,11 +1450,3 @@ class Ui_MainWindow(object):
         self.user_2.setTabText(self.user_2.indexOf(self.tab_2), _translate("MainWindow", "Administrator"))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))
         self.toolBar_3.setWindowTitle(_translate("MainWindow", "toolBar_3"))
-
-
-
-
-class WeldApp(QMainWindow, Ui_MainWindow):
-    def __init__(self, parent=None):
-        super(WeldApp, self).__init__(parent)
-        self.setupUi(self)

@@ -1,0 +1,29 @@
+//Install Qt designer
+
+sudo apt-get install qttools5-dev-tools
+sudo apt-get install qttools5-dev
+
+//start designer
+
+cd /usr/lib/x86_64-linux-gnu/qt5/bin/
+./designer
+
+
+//convert to py file
+pyuic5 <file.ui> -o <file.py>
+
+
+//git commands 
+
+//check old versions
+$ git log --oneline
+79a4e5f bad take
+f449007 The second commit
+55df4c2 My great project, first commit.
+
+//check out file
+$ git checkout 55df4c2 filename
+
+//add as new release
+$ git add filename
+$ git commit -m 'restoring filename from first commit.'
