@@ -1089,21 +1089,21 @@ QProgressBar::chunk
           <item>
            <layout class="QGridLayout" name="gridLayout_3">
             <item row="3" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_29">
+             <widget class="QLabel" name="set_time1_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 second&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="2" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_18">
+             <widget class="QLabel" name="set_current2_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 ampers&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="2" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_15">
+             <widget class="QLabel" name="set_current1_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 ampers&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -1117,14 +1117,14 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="1" column="2" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_20">
+             <widget class="QLabel" name="set_voltage3_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 Volt&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_17">
+             <widget class="QLabel" name="set_voltage2_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 Volt&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -1145,28 +1145,28 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="3" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_30">
+             <widget class="QLabel" name="set_time2_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 second&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-             <widget class="QLabel" name="label_14">
+             <widget class="QLabel" name="set_voltage1_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 Volt&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="2" column="2" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_21">
+             <widget class="QLabel" name="set_current3_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 ampers&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
              </widget>
             </item>
             <item row="3" column="2" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_41">
+             <widget class="QLabel" name="set_time3_label">
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;0 second&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
@@ -1208,7 +1208,7 @@ QProgressBar::chunk
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_26">
+           <widget class="QLabel" name="voltage_output_label">
             <property name="minimumSize">
              <size>
               <width>150</width>
@@ -1234,7 +1234,7 @@ QProgressBar::chunk
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_27">
+           <widget class="QLabel" name="current_output_label">
             <property name="minimumSize">
              <size>
               <width>150</width>
@@ -1254,7 +1254,7 @@ QProgressBar::chunk
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_28">
+           <widget class="QLabel" name="resistance_output_label">
             <property name="minimumSize">
              <size>
               <width>150</width>
@@ -1289,37 +1289,46 @@ QProgressBar::chunk
             <item row="1" column="0">
              <widget class="QLabel" name="label_54">
               <property name="text">
-               <string>TextLabel</string>
+               <string>Mesh width</string>
               </property>
              </widget>
             </item>
             <item row="2" column="1">
-             <widget class="QLineEdit" name="lineEdit_24"/>
+             <widget class="QLineEdit" name="mesh_length_input"/>
             </item>
             <item row="1" column="1">
-             <widget class="QLineEdit" name="lineEdit_23"/>
+             <widget class="QLineEdit" name="mesh_width_input"/>
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_55">
               <property name="text">
-               <string>TextLabel</string>
+               <string>Mesh Length</string>
               </property>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_22"/>
+             <widget class="QLineEdit" name="resistance_input"/>
             </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_42">
               <property name="text">
-               <string>TextLabel</string>
+               <string>Resistance</string>
               </property>
              </widget>
             </item>
             <item row="0" column="2">
              <widget class="QPushButton" name="pushButton_2">
               <property name="text">
-               <string>PushButton</string>
+               <string>CALCULATE 
+ RESISTANCE</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QPushButton" name="simulation_mode_button">
+              <property name="text">
+               <string>SIMULATION 
+ MODE</string>
               </property>
              </widget>
             </item>
@@ -1339,7 +1348,7 @@ QProgressBar::chunk
           <item>
            <layout class="QGridLayout" name="gridLayout_7">
             <item row="2" column="1">
-             <widget class="QLineEdit" name="lineEdit_18">
+             <widget class="QLineEdit" name="current1_input">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1352,7 +1361,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="2" column="6">
-             <widget class="QLineEdit" name="lineEdit_19">
+             <widget class="QLineEdit" name="current3_input">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1378,7 +1387,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="1" column="6">
-             <widget class="QLineEdit" name="lineEdit_20">
+             <widget class="QLineEdit" name="voltage3_input">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1391,7 +1400,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="3" column="1">
-             <widget class="QLineEdit" name="lineEdit_17">
+             <widget class="QLineEdit" name="time1_input">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1404,7 +1413,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="3" column="3">
-             <widget class="QLineEdit" name="lineEdit_14">
+             <widget class="QLineEdit" name="time2_input">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1417,7 +1426,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QLineEdit" name="lineEdit_13">
+             <widget class="QLineEdit" name="voltage1_input">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1430,7 +1439,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="2" column="3">
-             <widget class="QLineEdit" name="lineEdit_15">
+             <widget class="QLineEdit" name="current2_input_2">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1482,7 +1491,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="3" column="6">
-             <widget class="QLineEdit" name="lineEdit_16">
+             <widget class="QLineEdit" name="time3_input">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1521,7 +1530,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="1" column="3">
-             <widget class="QLineEdit" name="lineEdit_21">
+             <widget class="QLineEdit" name="voltage2_input">
               <property name="maximumSize">
                <size>
                 <width>150</width>
@@ -1604,7 +1613,7 @@ QProgressBar::chunk
              <enum>QLayout::SetDefaultConstraint</enum>
             </property>
             <item row="3" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_39">
+             <widget class="QLabel" name="tc9_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1618,7 +1627,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="1" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_37">
+             <widget class="QLabel" name="tc7_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1632,7 +1641,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="4" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_35">
+             <widget class="QLabel" name="tc5_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1646,7 +1655,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="1" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_32">
+             <widget class="QLabel" name="tc2_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1660,7 +1669,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="2" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_33">
+             <widget class="QLabel" name="tc3_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1682,7 +1691,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="2" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_38">
+             <widget class="QLabel" name="tc8_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1696,7 +1705,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="4" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_40">
+             <widget class="QLabel" name="tc10_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1718,7 +1727,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="3" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_34">
+             <widget class="QLabel" name="tc4_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1732,7 +1741,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="0" column="1" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_36">
+             <widget class="QLabel" name="tc6_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
@@ -1746,7 +1755,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="0" column="0" alignment="Qt::AlignHCenter">
-             <widget class="QLabel" name="label_31">
+             <widget class="QLabel" name="tc1_label">
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
