@@ -1,19 +1,22 @@
 from pyvisa import ResourceManager
 from pymodbus.client.sync import ModbusTcpClient
+from pyqtgraph.Qt import QtCore
 from threading import Thread
 import csv
 from time import perf_counter,sleep
 from collections import deque
 from run_cycle import run_cycle
 from make_connections import connect_to_power_supply, connect_to_plc
+
 class Weld:
 
-    def __init__(self,ui_object = None,visa_device_ip = None, visa_device_port = None, modbus_device_ip = None, modbus_device_port = None):
+    def __init__(self,ui_object = None, graph_object = None, visa_device_ip = None, visa_device_port = None, modbus_device_ip = None, modbus_device_port = None):
         '''
         Starting properties are set.
         Data containers will be added
         '''
         self.ui_object = ui_object
+        self.graph_object = graph_object
         self.visa_device_ip = visa_device_ip
         self.visa_device_port = visa_device_port
         self.modbus_device_ip = modbus_device_ip
@@ -23,20 +26,21 @@ class Weld:
         self.function_threads = {"measure_resistance" : Thread(target = self.measure_resistance_thread),
                                  "run_cycle" : Thread(target = self.run_cycle_thread),"measure_power_supply" : Thread(target = self.measure_power_supply_cycle_thread),
                                  "measure_plc" : Thread(target = self.measure_plc_cycle_thread),"emergency_stop" : Thread(target = self.emergency_stop_thread)}
-                                 
+
         self.cycle_time_datas = deque()
-        self.power_supply_datas = {"resistance" : deque(), "current" : deque(), "time" : deque()}
+        self.power_supply_datas = {"voltage" : deque(), "current" : deque(), "resistance" : deque()}
         self.plc_datas = {"TC1" : deque(), "TC2" : deque(), "TC3" : deque(),"TC4" : deque(),"TC5" : deque(),"TC6" : deque(),"TC7" : deque(),"TC8" : deque(),"TC9" : deque(),"TC10" : deque()}
         self.cycle_end = False
         self.connected_to_power_supply = False
         self.connected_to_plc = False
         self.simulation_mode = False
 
+
     def connect(self):
-        
+
         connection_threader = Thread(target = self.connection_thread)
         connection_threader.start()
-        
+
     def emergency_stop(self):
         self.function_threads["emergency_stop"].start()
 
@@ -51,15 +55,15 @@ class Weld:
         except Exception as error:
             print("Run cycle thread couldn' t completed : ",error)
             return -1
-        
+
     def run_cycle_thread(self):
-        
+
         print( run_cycle(power_supply = None , ui = self.ui_object, voltage1 = self.voltage1,current1 = self.current1,time1 = self.cycle_time1,voltage2 = self.voltage2,
                   current2 = self.current2 ,time2 = self.cycle_time1,voltage3 = self.voltage3 ,current3 = self.current3,time3 = self.cycle_time1,simulation_mode=self.simulation_mode))
-        
+
     def measure_power_supply_cycle(self):
         self.function_threads["measure_power_supply"].start()
-        
+
     def measure_power_supply_cycle(self):
         self.function_threads["measure_plc"].start()
 
@@ -68,11 +72,11 @@ class Weld:
         Checks connections between master computer and slave' s power supply and PLC/ARDUNIO
         '''
         self.connected_to_power_supply = True if connect_to_power_supply(self.resource_manager,self.ui_object) == 0 else False
-            
+
         self.connected_to_plc = True if connect_to_plc(self.PLC,self.ui_object) == 0 else False
-            
-            
-            
+
+
+
 
         print("Connections are checked")
 
@@ -99,12 +103,8 @@ class Weld:
             except Exception as error:
                 print("Error in calculating resistance",error)
 
-    def emergency_stop_thread(self):
-        '''
-        Stops power supply in emergency.
-        '''
-        print("Cycle stopped")
-        raise NotImplementedError
+
+
     def set_parameters(self):
         try:
             self.voltage1 = float(self.ui_object.voltage1_input.text())
@@ -116,7 +116,7 @@ class Weld:
             self.voltage3 = float(self.ui_object.voltage3_input.text())
             self.current3 = float(self.ui_object.current3_input.text())
             self.cycle_time3 = float(self.ui_object.time3_input.text())
-            
+
             self.ui_object.set_voltage1_label.setText(f"{self.voltage1} volts")
             self.ui_object.set_current1_label.setText(f"{self.current1} ampers")
             self.ui_object.set_time1_label.setText(f"{self.cycle_time1} sec")
@@ -127,10 +127,11 @@ class Weld:
             self.ui_object.set_current3_label.setText(f"{self.current3} ampers")
             self.ui_object.set_time3_label.setText(f"{self.cycle_time3} sec")
             print("Parameters are set")
+
         except Exception as error:
             print("Error while setting parameters : ",error)
 
-    
+
     def measure_power_supply_cycle_thread(self):
         '''
         Take the parameters and push them into data containers of Weld class object.
@@ -140,19 +141,19 @@ class Weld:
             measured_voltage = self.voltage_values[0]
             self.power_supply_data["voltage"].append(measured_voltage)
             self.ui_object.voltage_output_label.setText(f"Voltage {round(measured_voltage, 2)} V")
-            #self.curve1.setData(self.graphTime, self.voltageMeasurements)
-            
+
+
             current_values = self.power_supply_data.query_ascii_values(':MEASure:CURRent?')
             measured_current = self.current_values[0]
-            self.power_supply_data["current"].append(self.measured_current)
+            self.power_supply_data["current"].append(measured_current)
             self.ui_object.current_output_label.setText(f"Current {round(measured_current, 2)} A")
-            #self.curve2.setData(self.graphTime, self.currentMeasurements)
-            
+
+
             #Resistance will be added
-        
-        
+
+
         raise NotImplementedError
-    
+
     def measure_plc_cycle_thread(self):
         '''
         Take the parameters and push them into data containers of Weld class object.
@@ -165,12 +166,26 @@ class Weld:
                 try:
                     self.plc_datas[data].append(tcValues[i]/10)
                 except Exception as error:
-                    print(f"TC{i+1} not connected")                    
+                    print(f"TC{i+1} not connected")
                 i +=1
-                
-        
+
         raise NotImplementedError
-    
+
+    def draw(self):
+        print("emre")
+        self.graph_object.draw_cycle(voltage = self.plc_datas["voltage"], current = self.plc_datas["current"] )
+        """
+
+        """
+        raise NotImplementedError
+        
+    def emergency_stop_thread(self):
+        '''
+        Stops power supply in emergency.
+        '''
+        print("Cycle stopped")
+        raise NotImplementedError
+
     def simulation_mode_change(self):
         if self.simulation_mode == False:
             self.simulation_mode = True

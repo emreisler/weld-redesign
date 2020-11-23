@@ -24,7 +24,7 @@ def run_cycle(power_supply, ui, voltage1 ,current1,time1,voltage2 ,current2,time
             current_cycle_time = perf_counter()
 
             cycle_time = current_cycle_time - start_time
-            ui.cycleInfo1.setText(f"Cycle running...{step_name}\nRemaining time {round(time1 + time2 + time3 - cycle_time, 2)} seconds.. ")
+            ui.cycle_info1_label.setText(f"Cycle running...{step_name}\nRemaining time {round(time1 + time2 + time3 - cycle_time, 2)} seconds.. ")
 
             #Check time every loop and jump to second step parameters if cycletime exceeds set time for 1st step
             if cycle_time > time1 and step1_finished:
@@ -72,7 +72,7 @@ def run_cycle(power_supply, ui, voltage1 ,current1,time1,voltage2 ,current2,time
         ui.run_cycle_button.setText("RUN")
         ui.run_cycle_button.setEnabled(True)
         print("Cycle Completed")
-        
+
         return 0
     except Exception as error:
         print("Cycle finished with an error : ",error)

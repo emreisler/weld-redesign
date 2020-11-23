@@ -1069,14 +1069,14 @@ QProgressBar::chunk
         <item row="1" column="2">
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <widget class="QPushButton" name="power_supply_connection">
+           <widget class="QPushButton" name="power_supply_connection_button">
             <property name="text">
              <string>CONNECTING TO POWER SUPPLY...</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="temperature_connection">
+           <widget class="QPushButton" name="plc_connection_button">
             <property name="text">
              <string>CONNECTING TO DATA LOGGER...</string>
             </property>
@@ -1218,8 +1218,6 @@ QProgressBar::chunk
             <property name="font">
              <font>
               <pointsize>-1</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
              </font>
             </property>
             <property name="mouseTracking">
@@ -1244,12 +1242,10 @@ QProgressBar::chunk
             <property name="font">
              <font>
               <pointsize>-1</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
              </font>
             </property>
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Voltage 0 Volts&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Current 0 Ampers&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -1264,12 +1260,10 @@ QProgressBar::chunk
             <property name="font">
              <font>
               <pointsize>-1</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
              </font>
             </property>
             <property name="text">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Voltage 0 Volts&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Resistance 0 ohm&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
           </item>
@@ -1317,7 +1311,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QPushButton" name="pushButton_2">
+             <widget class="QPushButton" name="calculate_resistance_button">
               <property name="text">
                <string>CALCULATE 
  RESISTANCE</string>
@@ -1617,8 +1611,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1631,8 +1623,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1645,8 +1635,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1659,8 +1647,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1673,8 +1659,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1683,7 +1667,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="5" column="1">
-             <widget class="QPushButton" name="stop_temps">
+             <widget class="QPushButton" name="stop_temperatures_button">
               <property name="text">
                <string>STOP 
  MEASURING</string>
@@ -1695,8 +1679,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1709,8 +1691,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1719,7 +1699,7 @@ QProgressBar::chunk
              </widget>
             </item>
             <item row="5" column="0">
-             <widget class="QPushButton" name="measure_temps">
+             <widget class="QPushButton" name="measure_temperatures_button">
               <property name="text">
                <string>MEASURE
  TEMPERATURES</string>
@@ -1731,8 +1711,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1745,8 +1723,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1759,8 +1735,6 @@ QProgressBar::chunk
               <property name="font">
                <font>
                 <pointsize>-1</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
                </font>
               </property>
               <property name="text">
@@ -1775,21 +1749,21 @@ QProgressBar::chunk
         <item row="1" column="1">
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
-           <widget class="QLabel" name="cycleInfo1">
+           <widget class="QLabel" name="cycle_info1_label">
             <property name="text">
              <string>cycleInfo1</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="cycleInfo2">
+           <widget class="QLabel" name="cycle_info2_label">
             <property name="text">
              <string>cycleInfo2</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="cycleInfo3">
+           <widget class="QLabel" name="cycle_info3_label">
             <property name="text">
              <string>cycleInfo3</string>
             </property>
@@ -1814,7 +1788,7 @@ QProgressBar::chunk
      <x>0</x>
      <y>0</y>
      <width>1209</width>
-     <height>24</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>
