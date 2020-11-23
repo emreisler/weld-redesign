@@ -1025,7 +1025,7 @@ class Ui_MainWindow(object):
         self.gridLayout.setObjectName("gridLayout")
         self.label_24 = QtWidgets.QLabel(self.user)
         self.label_24.setText("")
-        self.label_24.setPixmap(QtGui.QPixmap("../weld-linux/images/logo.svg"))
+        self.label_24.setPixmap(QtGui.QPixmap("logo.svg"))
         self.label_24.setObjectName("label_24")
         self.gridLayout.addWidget(self.label_24, 0, 2, 1, 1, QtCore.Qt.AlignTop)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout()
@@ -1422,7 +1422,7 @@ class Ui_MainWindow(object):
         self.pushButton_2.setText(_translate("MainWindow", "CALCULATE \n"
 " RESISTANCE"))
         self.simulation_mode_button.setText(_translate("MainWindow", "SIMULATION \n"
-" MODE"))
+" MODE(OFF)"))
         self.label_44.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:11pt; color:#1e92ca;\">TEMPERATURE MEASUREMENTS</span></p></body></html>"))
         self.label_49.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">Time(dwell):</span></p></body></html>"))
         self.label_50.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:10pt;\">Time(dwell):</span></p></body></html>"))
