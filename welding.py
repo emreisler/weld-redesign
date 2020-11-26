@@ -174,15 +174,7 @@ class Weld:
 
         if self.simulation_mode:
             for (key,value) in self.plc_datas.items():
-                if key == "TC10":
-                    print("TC10 dont write")
-                    print(value)
-                elif key == "TC7":
-
-                    value.append(rand)
-                    print(value)
-                else:
-                    print(value)
+                value.append(randint(5,15))
 
         print("End get data from plc")
 
@@ -222,7 +214,7 @@ class Weld:
     def temperature_panel_writer(self,**data):
         raise NotImplementedError
 
-    def power_supply_panel_writer(self,voltage = 0,current = 0)
+    def power_supply_panel_writer(self,voltage = 0,current = 0):
         raise NotImplementedError
 
     def emergency_stop_thread(self):

@@ -26,7 +26,7 @@ def main():
     user_interface.set_parameters_button.clicked.connect(welder.set_parameters)
     welder.connect()
     timer = QtCore.QTimer()
-    timer.timeout.connect(welder.draw)
+    timer.timeout.connect(welder.draw_write)
     timer.start(1000)
 
     user_interface.showMaximized()
