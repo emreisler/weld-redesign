@@ -25,10 +25,17 @@ def main():
     user_interface.calculate_resistance_button.clicked.connect(welder.measure_resistance)
     user_interface.simulation_mode_button.clicked.connect(welder.simulation_mode_change)
     user_interface.set_parameters_button.clicked.connect(welder.set_parameters)
-    welder.connect()
-    timer = QtCore.QTimer()
-    timer.timeout.connect(welder.draw_write)
-    timer.start(1000)
+    timer_power_supply_connect = QtCore.QTimer()
+    timer_power_supply_connect.timeout.connect(welder.connect_to_power_supply)
+    timer_power_supply_connect.start(5000)
+    timer_plc_connect = QtCore.QTimer()
+    timer_plc_connect.timeout.connect(welder.connect_to_plc)
+    timer_plc_connect.start(5000)
+
+
+    timer_graph = QtCore.QTimer()
+    timer_graph.timeout.connect(welder.draw_write)
+    timer_graph.start(1000)
 
     user_interface.showMaximized()
 
