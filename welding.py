@@ -93,56 +93,6 @@ class Weld:
             print("Error while setting parameters : ",error)
 
 
-    def measure_power_supply_cycle_thread(self):
-        '''
-        Take the parameters and push them into data containers of Weld class object.
-        '''
-
-
-
-
-        if self.simulation_mode:
-            for data in self.power_supply_datas:
-                self.power_supply_datas[data].append(randint(1,200))
-        else:
-            voltage_values = self.power_supply.query_ascii_values(':MEASure:VOLTage?')
-            measured_voltage = self.voltage_values[0]
-            self.power_supply_datas["voltage"].append(measured_voltage)
-            self.ui_object.voltage_output_label.setText(f"Voltage {round(measured_voltage, 2)} V")
-
-            current_values = self.power_supply_datas.query_ascii_values(':MEASure:CURRent?')
-            measured_current = self.current_values[0]
-            self.power_supply_datas["current"].append(measured_current)
-            self.ui_object.current_output_label.setText(f"Current {round(measured_current, 2)} A")
-
-            self.power_supply_datas["resistance"].append(round(measured_voltage / measured_current),2)
-
-
-    def measure_plc_cycle_thread(self):
-        '''
-        Take the parameters and push them into data containers of Weld class object.
-        '''
-
-
-
-
-
-        if self.simulation_mode:
-            for (key,value) in self.plc_datas.items():
-                value.append(randint(5,15))
-        else:
-            tc_values = self.PLC.read_holding_registers(40, 10, unit=0)
-            assert(tc_values.function_code < 0x80)  # test that there is not an error
-            i = 0
-            for data in self.plc_datas:
-                try:
-                    self.plc_datas[data].append(tcValues[i]/10)
-                except Exception as error:
-                    print(f"TC{i+1} not connected")
-                i +=1
-
-
-
     def draw_write(self):
         """
         Calls measure power supply and plc functions to update Welder object data containers.
@@ -150,8 +100,20 @@ class Weld:
         """
 
         if self.cycle_continue:
-            self.measure_power_supply_cycle_thread()
-            self.measure_plc_cycle_thread()
+            power_supply_data = self.power_supply.measure(simu_mode=True)
+            self.power_supply_datas["voltage"].append(power_supply_data[0])
+            self.power_supply_datas["current"].append(power_supply_data[1])
+            try:
+                self.power_supply_datas["resistance"].append(power_supply_data[0] / power_supply_data[1])
+            except ZeroDivisionError:
+                self.power_supply_datas["resistance"].append(0)
+            i = 0
+            plc_data = self.plc.measure()
+            for value in self.plc_datas.values():
+                value.append(plc_data[i])
+                i += 1
+            #UI panel writing operations will be added
+
             self.cycle_time = perf_counter() - self.cycle_start_time
             self.cycle_time_datas.append(self.cycle_time)
 
@@ -193,17 +155,6 @@ class Weld:
         except Exception as error:
             print("Error in power supply data writing on ui panel : ",error)
 
-    def emergency_stop_thread(self):
-
-        '''
-        Stops power supply in emergency.
-        '''
-        self.power_supply = self.resource_manager.open_resource(f'TCPIP0::{self.visa_device_ip}::inst0::INSTR')
-        self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))
-        self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
-        print("Cycle stopped")
-        raise NotImplementedError
-
     def simulation_mode_change(self):
         if self.simulation_mode == False:
             self.simulation_mode = True
@@ -215,8 +166,3 @@ class Weld:
             self.ui_object.simulation_mode_button.setText(f"SIMULATION MODE - OFF")
             self.ui_object.simulation_mode_button.setStyleSheet("background-color : rgb(78, 154, 6)")
             print(self.simulation_mode)
-    def csv_write(self):
-        '''
-        Will be called in a thraded function so this function do not use thread.
-        '''
-        raise NotImplementedError

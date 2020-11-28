@@ -166,7 +166,7 @@ class PowerSupply:
         except Exception as error:
             print("Cycled couldn' t stopped : ", error)
 
-    def measure(self):
+    def measure(self,ui = None, simu_mode = False):
         self.connect()
         if self.connected:
             try:
@@ -174,7 +174,9 @@ class PowerSupply:
                 measured_voltage = self.voltage_values[0]
                 current_values = self.power_supply_datas.query_ascii_values(':MEASure:CURRent?')
                 measured_current = self.current_values[0]
-                return round(measured_voltage,2), round(measured_current,2)
+                return (round(measured_voltage,2), round(measured_current,2)
 
             except Exception as error:
                 print("Couldn' t measured : ", error)
+                return (10,15)
+        return (10,15)
