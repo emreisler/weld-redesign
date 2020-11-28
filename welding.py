@@ -57,7 +57,13 @@ class Weld:
         try:
             self.graph_object.clear_graph()
             self.cycle_continue = True
-            self.function_threads["run_cycle"].start()
+            self.cycle_start_time = perf_counter()
+            #self.function_threads["run_cycle"].start()
+            run_cycle_threader = Thread(target = run_cycle, args = (self.power_supply ,self.ui_object,self.voltage1,
+                            self.current1,self.cycle_time1,self.voltage2,
+                            self.current2 ,self.cycle_time1,self.voltage3 ,self.current3,self.cycle_time1,
+                            self.simulation_mode,))
+            run_cycle_threader.start()
             print("Run cycle thread completed")
             return 0
         except Exception as error:
@@ -241,10 +247,13 @@ class Weld:
             print("Error in power supply data writing on ui panel : ",error)
 
     def emergency_stop_thread(self):
+
         '''
         Stops power supply in emergency.
         '''
-
+        self.power_supply = self.resource_manager.open_resource(f'TCPIP0::{self.visa_device_ip}::inst0::INSTR')
+        self.power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))
+        self.power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
         print("Cycle stopped")
         raise NotImplementedError
 
