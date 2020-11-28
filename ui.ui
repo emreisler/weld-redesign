@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1238</width>
-    <height>601</height>
+    <width>1255</width>
+    <height>609</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1019,30 +1019,40 @@ QProgressBar::chunk
          <string notr="true">border-width: 1; border-radius: 1;border-style: solid;border-color: rgb(100,100,100)</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_9">
-         <item row="1" column="0">
-          <widget class="QLabel" name="cycle_info2_label">
+         <item row="2" column="0">
+          <widget class="QLabel" name="current_info_label">
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
-            <string>Cycle Information</string>
+            <string>0 ampers</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="voltage_info_label">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
+           </property>
+           <property name="text">
+            <string>0 Volts</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="resistance_info_label">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
+           </property>
+           <property name="text">
+            <string>0 ohms</string>
            </property>
           </widget>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="cycle_info1_label">
+          <widget class="QLabel" name="label_16">
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
-           </property>
-           <property name="text">
-            <string>Cycle Information</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="cycle_info3_label">
-           <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            </property>
            <property name="text">
             <string>Cycle Information</string>
@@ -1060,6 +1070,9 @@ QProgressBar::chunk
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="1" column="0">
           <widget class="QLabel" name="label">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Resistance :</string>
            </property>
@@ -1120,6 +1133,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
            <property name="autoFillBackground">
             <bool>false</bool>
            </property>
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Mesh length :</string>
            </property>
@@ -1127,6 +1143,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_2">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Mesh width :</string>
            </property>
@@ -1134,6 +1153,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="3" column="2">
           <widget class="QLabel" name="label_18">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>SOIR NUMBER :</string>
            </property>
@@ -1144,6 +1166,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="1" column="2" colspan="2">
           <widget class="QPushButton" name="pushButton">
+           <property name="styleSheet">
+            <string notr="true">font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>CALCULATE RESISTANCE</string>
            </property>
@@ -1433,7 +1458,7 @@ font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            </property>
            <property name="styleSheet">
             <string notr="true">background-color: rgb(255, 0, 0);
-font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
+font: 16pt &quot;MS Shell Dlg 2&quot;;</string>
            </property>
            <property name="text">
             <string>EMERGENCY 
@@ -1465,6 +1490,9 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
              <height>40</height>
             </size>
            </property>
+           <property name="styleSheet">
+            <string notr="true">font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>CONNECT TO PLC</string>
            </property>
@@ -1478,6 +1506,9 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
              <height>40</height>
             </size>
            </property>
+           <property name="styleSheet">
+            <string notr="true">font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>CONNECT TO POWER SUPPLY</string>
            </property>
@@ -1486,7 +1517,8 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
          <item row="0" column="0">
           <widget class="QPushButton" name="simulation_mode_button">
            <property name="styleSheet">
-            <string notr="true">background-color: rgb(255, 85, 0);</string>
+            <string notr="true">background-color: rgb(255, 85, 0);
+font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            </property>
            <property name="text">
             <string>SIMULATION MODE</string>
@@ -1533,7 +1565,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC7</string>
@@ -1549,7 +1581,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC2</string>
@@ -1565,7 +1597,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC6</string>
@@ -1581,7 +1613,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC4</string>
@@ -1597,7 +1629,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC3</string>
@@ -1613,7 +1645,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC9</string>
@@ -1629,7 +1661,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC10</string>
@@ -1645,7 +1677,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC8</string>
@@ -1659,6 +1691,9 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
              <width>92</width>
              <height>30</height>
             </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            </property>
            <property name="text">
             <string>STOP 
@@ -1675,7 +1710,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC1</string>
@@ -1691,7 +1726,7 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
             </size>
            </property>
            <property name="styleSheet">
-            <string notr="true">border-style : none;</string>
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;border-style : none;</string>
            </property>
            <property name="text">
             <string>TC5</string>
@@ -1705,6 +1740,9 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
              <width>92</width>
              <height>30</height>
             </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 11pt &quot;MS Shell Dlg 2&quot;;</string>
            </property>
            <property name="text">
             <string>MEASURE 
@@ -1723,6 +1761,9 @@ font: 75 10pt &quot;MS Shell Dlg 2&quot;;</string>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="1" column="4">
           <widget class="QLabel" name="label_10">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Voltage(dwell) volts :</string>
            </property>
@@ -1747,6 +1788,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_4">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Voltage(raise) volts :</string>
            </property>
@@ -1754,6 +1798,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="3" column="2">
           <widget class="QLabel" name="label_9">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Time(melt) seconds :</string>
            </property>
@@ -1770,6 +1817,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="2" column="4">
           <widget class="QLabel" name="label_11">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Current(dwell) ampers :</string>
            </property>
@@ -1777,6 +1827,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_5">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Current(raise) ampers :</string>
            </property>
@@ -1790,6 +1843,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="label_6">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Time(raise) seconds :</string>
            </property>
@@ -1797,6 +1853,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="3" column="4">
           <widget class="QLabel" name="label_12">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Time(dwell) seconds :</string>
            </property>
@@ -1829,6 +1888,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="2" column="2">
           <widget class="QLabel" name="label_8">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Current(melt) ampers :</string>
            </property>
@@ -1836,6 +1898,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
          </item>
          <item row="1" column="2">
           <widget class="QLabel" name="label_7">
+           <property name="styleSheet">
+            <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>Voltage(melt) volts :</string>
            </property>
@@ -1892,6 +1957,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <height>25</height>
             </size>
            </property>
+           <property name="styleSheet">
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>old_cycle3</string>
            </property>
@@ -1910,6 +1978,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <width>16777215</width>
              <height>25</height>
             </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;</string>
            </property>
            <property name="text">
             <string>old_cycle4</string>
@@ -1930,6 +2001,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <height>25</height>
             </size>
            </property>
+           <property name="styleSheet">
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>old_cycle2</string>
            </property>
@@ -1948,6 +2022,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <width>16777215</width>
              <height>25</height>
             </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;</string>
            </property>
            <property name="text">
             <string>old_cycle5</string>
@@ -1968,6 +2045,9 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
              <height>25</height>
             </size>
            </property>
+           <property name="styleSheet">
+            <string notr="true">font: 9pt &quot;MS Shell Dlg 2&quot;;</string>
+           </property>
            <property name="text">
             <string>old_cycle1</string>
            </property>
@@ -1985,7 +2065,7 @@ font: 12pt &quot;MS Shell Dlg 2&quot;;</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1238</width>
+     <width>1255</width>
      <height>30</height>
     </rect>
    </property>

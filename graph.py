@@ -32,18 +32,18 @@ class Graph(pg.GraphicsWindow):
         '''
         raise NotImplementedError
 
-    def draw_cycle(self,**data):
+    def draw_cycle(self,connected_to_plc = True, **data):
         '''
         Draw the cyle parameters to graph. This function do not use thread because thread is already using by QTimer function which calls this function repeatedly
         '''
-        print("graph trying to draw")
-
-        try:
-            for (curve_key,curve_item), (arg_key,arg_value) in zip(self.curves.items(), data.items()):
-                if arg_key != "time":
-                    try:
-                        curve_item.setData(data["time"],arg_value)
-                    except Exception as error:
-                        print(f"{arg_key} has no input : ",error)
-        except Exception as error:
-            print("Couldn' t draw : ", error)
+       
+        if connected_to_plc:
+            try:
+                for (curve_key,curve_item), (arg_key,arg_value) in zip(self.curves.items(), data.items()):
+                    if arg_key != "time":
+                        try:
+                            curve_item.setData(data["time"],arg_value)
+                        except Exception as error:
+                            print(f"{arg_key} has no input : ",error)
+            except Exception as error:
+                print("Couldn' t draw : ", error)
