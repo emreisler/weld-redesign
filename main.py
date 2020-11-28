@@ -22,6 +22,7 @@ def main():
     #CONNECTIONS OF BUTTONS
     user_interface.run_cycle_button.clicked.connect(welder.run_cycle)
     user_interface.emergency_button.clicked.connect(welder.emergency_stop)
+    user_interface.calculate_resistance_button.clicked.connect(welder.measure_resistance)
     user_interface.simulation_mode_button.clicked.connect(welder.simulation_mode_change)
     user_interface.set_parameters_button.clicked.connect(welder.set_parameters)
     welder.connect()
@@ -31,7 +32,7 @@ def main():
 
     user_interface.showMaximized()
 
-    app.exec_()
+    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':

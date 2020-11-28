@@ -30,13 +30,13 @@ class Graph(pg.GraphicsWindow):
         '''
         Clearing the polotted curves.
         '''
-        raise NotImplementedError
+        pass
 
     def draw_cycle(self,connected_to_plc = True, **data):
         '''
         Draw the cyle parameters to graph. This function do not use thread because thread is already using by QTimer function which calls this function repeatedly
         '''
-       
+
         if connected_to_plc:
             try:
                 for (curve_key,curve_item), (arg_key,arg_value) in zip(self.curves.items(), data.items()):

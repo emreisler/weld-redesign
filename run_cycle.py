@@ -1,4 +1,5 @@
 from time import perf_counter
+import math
 
 def run_cycle(power_supply, ui, voltage1 ,current1,time1,voltage2 ,current2,time2,voltage3 ,current3,time3,simulation_mode=False):
     start_time = perf_counter()
@@ -24,8 +25,11 @@ def run_cycle(power_supply, ui, voltage1 ,current1,time1,voltage2 ,current2,time
             current_cycle_time = perf_counter()
 
             cycle_time = current_cycle_time - start_time
-            ui.cycle_info1_label.setText(f"Cycle running...{step_name}\nRemaining time {round(time1 + time2 + time3 - cycle_time, 2)} seconds.. ")
-
+            ui.cycle_info_label.setText(f"Cycle running...{step_name}\nRemaining time {round(time1 + time2 + time3 - cycle_time)} seconds.. ")
+            total_time = time1 + time2 + time3
+            completed_ratio= cycle_time / total_time
+            completed_percent = math.ceil(completed_ratio * 100)
+            ui.progressBar.setValue(completed_percent)
             #Check time every loop and jump to second step parameters if cycletime exceeds set time for 1st step
             if cycle_time > time1 and step1_finished:
                 try:
@@ -62,7 +66,7 @@ def run_cycle(power_supply, ui, voltage1 ,current1,time1,voltage2 ,current2,time
                 except Exception as error:
                     print("Error while jumping to end")
 
-
+        ui.cycle_info_label.setText(f"Cycle completed...\nRemaining time {round(time1 + time2 + time3 - cycle_time)} seconds.. ")
         if not simulation_mode:
             power_supply.write(':SOURce:VOLTage:LEVel:IMMediate:AMPLitude %G' % (0))
             power_supply.write(':SOURce:CURRent:LEVel:IMMediate:AMPLitude %G' % (0))

@@ -10,6 +10,7 @@ from make_connections import connect_to_power_supply, connect_to_plc
 from random import randint
 import sys
 
+
 class Weld:
 
     def __init__(self,ui_object = None, graph_object = None, visa_device_ip = None, visa_device_port = None, modbus_device_ip = None, modbus_device_port = None):
@@ -24,6 +25,7 @@ class Weld:
         self.modbus_device_ip = modbus_device_ip
         self.modbus_device_port = modbus_device_port
         self.resource_manager = ResourceManager()
+        self.power_supply = None
         self.PLC = ModbusTcpClient(self.modbus_device_ip, self.modbus_device_port)
         self.function_threads = {"measure_resistance" : Thread(target = self.measure_resistance_thread),
                                  "run_cycle" : Thread(target = self.run_cycle_thread),"measure_power_supply" : Thread(target = self.measure_power_supply_cycle_thread),
@@ -36,7 +38,7 @@ class Weld:
         self.cycle_end = False
         self.connected_to_power_supply = False
         self.connected_to_plc = False
-        self.simulation_mode = True
+        self.simulation_mode = False
         self.cycle_start_time = perf_counter()
         self.cycle_continue = False
 
@@ -64,7 +66,7 @@ class Weld:
 
     def run_cycle_thread(self):
 
-        print(run_cycle(power_supply = None , ui = self.ui_object, voltage1 = self.voltage1,current1 = self.current1,time1 = self.cycle_time1,voltage2 = self.voltage2,
+        print(run_cycle(power_supply = self.power_supply , ui = self.ui_object, voltage1 = self.voltage1,current1 = self.current1,time1 = self.cycle_time1,voltage2 = self.voltage2,
                   current2 = self.current2 ,time2 = self.cycle_time1,voltage3 = self.voltage3 ,current3 = self.current3,time3 = self.cycle_time1,
                   simulation_mode=self.simulation_mode))
         self.cycle_start_time = perf_counter()
@@ -81,13 +83,16 @@ class Weld:
         '''
         self.connected_to_power_supply = True if connect_to_power_supply(self.resource_manager,self.ui_object) == 0 else False
 
+
+
         self.connected_to_plc = True if connect_to_plc(self.PLC,self.ui_object) == 0 else False
 
         print("Connections are checked")
 
     def measure_resistance_thread(self):
         if self.simulation_mode:
-            raise NotImplementedError
+            print("Resistance can't be calculated in simulation mode")
+            return -2
         else:
 
             try:
@@ -105,11 +110,13 @@ class Weld:
                 self.power_supply.write('*RST')
                 self.power_supply.close()
                 self.resource_manager.close()
+                return 0
             except Exception as error:
                 print("Error in calculating resistance",error)
+                return -1
 
     def set_parameters(self):
-        
+
         try:
             self.voltage1 = float(self.ui_object.voltage1_input.text())
             self.current1 = float(self.ui_object.current1_input.text())
@@ -140,7 +147,7 @@ class Weld:
         '''
         Take the parameters and push them into data containers of Weld class object.
         '''
-        
+
         if not self.cycle_end and self.connected_to_power_supply:
             voltage_values = self.power_supply.query_ascii_values(':MEASure:VOLTage?')
             measured_voltage = self.voltage_values[0]
@@ -158,13 +165,13 @@ class Weld:
             for data in self.power_supply_datas:
                 self.power_supply_datas[data].append(randint(1,200))
 
-        
+
 
     def measure_plc_cycle_thread(self):
         '''
         Take the parameters and push them into data containers of Weld class object.
         '''
-        
+
         if not self.cycle_end and self.connected_to_plc:
             tc_values = self.PLC.read_holding_registers(40, 10, unit=0)
             assert(tc_values.function_code < 0x80)  # test that there is not an error
@@ -175,33 +182,33 @@ class Weld:
                 except Exception as error:
                     print(f"TC{i+1} not connected")
                 i +=1
-            
+
 
         if self.simulation_mode:
             for (key,value) in self.plc_datas.items():
                 value.append(randint(5,15))
 
-        
+
 
     def draw_write(self):
         """
         Calls measure power supply and plc functions to update Welder object data containers.
         And calls draw cycle function of Graph object to draw contained data.
         """
-        
-        while self.cycle_continue:
+
+        if self.cycle_continue:
             self.measure_power_supply_cycle_thread()
             self.measure_plc_cycle_thread()
             self.cycle_time = perf_counter() - self.cycle_start_time
             self.cycle_time_datas.append(self.cycle_time)
 
-            self.graph_object.draw_cycle(connected_to_plc = self.connected_to_plc,time =self.cycle_time_datas, voltage = self.power_supply_datas["voltage"], current = self.power_supply_datas["current"],
+            self.graph_object.draw_cycle(simulation_mode = False, connected_to_plc = self.connected_to_plc,time =self.cycle_time_datas, voltage = self.power_supply_datas["voltage"], current = self.power_supply_datas["current"],
                                         resistance = self.power_supply_datas["resistance"],
                                         tc1 = self.plc_datas["TC1"],tc2 = self.plc_datas["TC2"],tc3 = self.plc_datas["TC3"],
                                         tc4 = self.plc_datas["TC4"],tc5 = self.plc_datas["TC5"],tc6 = self.plc_datas["TC6"],
                                         tc7 = self.plc_datas["TC7"],tc8 = self.plc_datas["TC8"],tc9 = self.plc_datas["TC9"],
                                         tc10 = self.plc_datas["TC10"])
-        
+
     def temperature_panel_writer(self,**temperatures):
         '''
         Measured temperature values will be written on related zone of ui panel
@@ -217,10 +224,10 @@ class Weld:
             self.ui_object.tc_label8.setText(f"{temperatures['tc8']}")
             self.ui_object.tc_label9.setText(f"{temperatures['tc9']}")
             self.ui_object.tc_label10.setText(f"{temperatures['tc10']}")
-            
+
         except Exception as error:
             print("Error in temperature writing on ui panel : ",error)
-        
+
     def power_supply_panel_writer(self,voltage,current):
         '''
         Measured voltage, current and calculated resistance values will be written on related zone of ui panel
@@ -229,28 +236,28 @@ class Weld:
             self.ui_object.voltage_info_label.setText(f"{voltage} Volts")
             self.ui_object.current_info_label.setText(f"{current} Ampers")
             self.ui_object.time_info_label.setText(f"{round(voltage/current),2} ohms")
-        
+
         except Exception as error:
-            print("Error in power supply data writing on ui panel : ",error)        
-        
+            print("Error in power supply data writing on ui panel : ",error)
+
     def emergency_stop_thread(self):
         '''
         Stops power supply in emergency.
         '''
-        
+
         print("Cycle stopped")
         raise NotImplementedError
 
     def simulation_mode_change(self):
         if self.simulation_mode == False:
             self.simulation_mode = True
-            self.ui_object.simulation_mode_button.setText(f"SIMULATION \nMODE(ON)")
+            self.ui_object.simulation_mode_button.setText(f"SIMULATION MODE - ON")
             self.ui_object.simulation_mode_button.setStyleSheet("background-color : rgb(255, 85, 0)")
             print(self.simulation_mode)
         else:
             self.simulation_mode = False
-            self.ui_object.simulation_mode_button.setText(f"SIMULATION \nMODE(OFF)")
-            self.ui_object.simulation_mode_button.setStyleSheet("background-color : rgb(85, 170, 0)")
+            self.ui_object.simulation_mode_button.setText(f"SIMULATION MODE - OFF")
+            self.ui_object.simulation_mode_button.setStyleSheet("background-color : rgb(78, 154, 6)")
             print(self.simulation_mode)
     def csv_write(self):
         '''
