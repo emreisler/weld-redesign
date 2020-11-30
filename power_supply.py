@@ -21,7 +21,7 @@ class PowerSupply:
             self.connected = True
             return 0
         except Exception as error:
-            print("Connection to power supply error : ", error)
+            #print("Connection to power supply error : ", error)
             if ui:
                 ui.power_supply_connection_button.setStyleSheet("background-color: rgb(255, 85, 0)")
                 ui.power_supply_connection_button.setText(f"NOT CONNECTED TO \nPOWER SUPPLY...")
@@ -78,31 +78,32 @@ class PowerSupply:
             step2_finished = True
             step3_finished = True
             step_name = "Raise(1st) Step"
-
+            
             #Start the cycle loop
             while not self.cycle_end :
-
+                
                 #Get current time each loop
                 current_cycle_time = perf_counter()
 
                 cycle_time = current_cycle_time - start_time
 
-        
                 total_time = time1 + time2 + time3
                 
-
-                
                 if ui:
+                    
                     ui.cycle_info_label.setText(f"Cycle running...{step_name}\nRemaining time {round(time1 + time2 + time3 - cycle_time)} seconds.. ")
                     try:
                         completed_ratio = cycle_time / total_time
                         completed_percent = math.ceil(completed_ratio * 100)
                     except ZeroDivisionError:
                         completed_percent = 0
+                    """    
                     try:
                         ui.progressBar.setValue(completed_percent)
                     except Exception as error:
                         print("Progress bar error",error)
+                    """
+                    
 
 
                 #Check time every loop and jump to second step parameters if cycletime exceeds set time for 1st step
@@ -177,16 +178,20 @@ class PowerSupply:
             print("Cycled couldn' t stopped : ", error)
 
     def measure(self,ui = None, simu_mode = False):
-        self.connect()
-        if self.connected:
-            try:
-                voltage_values = self.power_supply.query_ascii_values(':MEASure:VOLTage?')
-                measured_voltage = self.voltage_values[0]
-                current_values = self.power_supply_datas.query_ascii_values(':MEASure:CURRent?')
-                measured_current = self.current_values[0]
-                return (round(measured_voltage,2), round(measured_current,2))
+        if not simu_mode:
+            self.connect()
+            if self.connected:
+                try:
+                    voltage_values = self.power_supply.query_ascii_values(':MEASure:VOLTage?')
+                    measured_voltage = self.voltage_values[0]
+                    current_values = self.power_supply_datas.query_ascii_values(':MEASure:CURRent?')
+                    measured_current = self.current_values[0]
+                    return (round(measured_voltage,2), round(measured_current,2))
 
-            except Exception as error:
-                print("Couldn' t measured : ", error)
-                return (10,15)
-        return (10,15)
+                except Exception as error:
+                    print("Couldn' t measured : ", error)
+                    return (1,1)
+            return (1,1)
+        else:
+            return (50,75)
+            

@@ -34,11 +34,8 @@ def main():
     timer_plc_connect = QtCore.QTimer()
     timer_plc_connect.timeout.connect(welder.connect_to_plc)
     timer_plc_connect.start(5000)
-    #TRY TO DRAW GRAPH EVERY 1SECOND 
-    timer_graph = QtCore.QTimer()
-    timer_graph.timeout.connect(welder.draw_write)
-    timer_graph.start(1000)
-
+    
+    
     user_interface.showMaximized()
 
     sys.exit(app.exec_())

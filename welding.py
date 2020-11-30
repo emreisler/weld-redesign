@@ -32,6 +32,10 @@ class Weld:
         self.simulation_mode = False
         self.cycle_start_time = perf_counter()
         self.cycle_continue = False
+        #TRY TO DRAW GRAPH EVERY 1SECOND 
+        self.timer_graph = QtCore.QTimer()
+        self.timer_graph.timeout.connect(self.draw_write)
+        
 
     def connect_to_power_supply(self):
         power_supply_connection_thread = Thread(target = self.power_supply.connect, args = (self.ui_object,))
@@ -62,8 +66,11 @@ class Weld:
                                                                                       self.simulation_mode,))
 
             run_cycle_threader.start()
+            
+            self.timer_graph.start(1000)
             print("Run cycle thread completed")
             return 0
+        
         except Exception as error:
             print("Run cycle thread couldn' t completed : ",error)
             return -1
@@ -88,23 +95,26 @@ class Weld:
             except Exception as error:
                 print("Set value error: ", error)
         print(self.cycle_parameters)
+        
     def draw_write(self):
         """
         Calls measure power supply and plc functions to update Welder object data containers.
         And calls draw cycle function of Graph object to draw contained data.
         """
-
+        print("draw")
+        
         if self.cycle_continue:
-            power_supply_data = self.power_supply.measure(simu_mode=True)
+            power_supply_data = self.power_supply.measure(simu_mode=self.simulation_mode)
             self.power_supply_datas["voltage"].append(power_supply_data[0])
             self.power_supply_datas["current"].append(power_supply_data[1])
             try:
                 self.power_supply_datas["resistance"].append(power_supply_data[0] / power_supply_data[1])
             except ZeroDivisionError:
                 self.power_supply_datas["resistance"].append(0)
-                
+               
             i = 0
-            plc_data = self.plc.measure()
+            
+            plc_data = self.plc.measure(simu_mode=self.simulation_mode)
             for value in self.plc_datas.values():
                 value.append(plc_data[i])
                 i += 1
@@ -115,7 +125,8 @@ class Weld:
             
             self.cycle_time = perf_counter() - self.cycle_start_time
             self.cycle_time_datas.append(self.cycle_time)
-
+            
+            
             self.graph_object.draw_cycle(connected_to_power_supply = True if self.simulation_mode else self.power_supply.connected,
                                         connected_to_plc =  True if self.simulation_mode else self.plc.connected,
                                         time =self.cycle_time_datas, voltage = self.power_supply_datas["voltage"],
@@ -126,6 +137,7 @@ class Weld:
                                         tc10 = self.plc_datas["TC10"])
         else:
             print(f"Not drawing because self.cycle_continue is {self.cycle_continue}")
+        
 
     def temperature_panel_writer(self,**temperatures):
         '''
@@ -140,6 +152,7 @@ class Weld:
             except KeyError:
                 temp_label_array[i].setText(f"TC{i+1}-OFF")
             i += 1
+            
     def power_supply_panel_writer(self,voltage,current):
         '''
         Measured voltage, current and calculated resistance values will be written on related zone of ui panel
