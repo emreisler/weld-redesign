@@ -23,13 +23,15 @@ class Weld:
 
         self.cycle_time_datas = deque()
         self.power_supply_datas = {"voltage" : deque(), "current" : deque(), "resistance" : deque()}
-        self.plc_datas = {"TC1" : deque(), "TC2" : deque(), "TC3" : deque(),"TC4" : deque(),"TC5" : deque(),"TC6" : deque(),
-                            "TC7" : deque(),"TC8" : deque(),"TC9" : deque(),"TC10" : deque()}
-
+        
+        self.plc_datas = {"TC1" : deque(), "TC2" : deque(), "TC3" : deque(),"TC4" : deque(),"TC5" : deque(),
+                          "TC6" : deque(),"TC7" : deque(),"TC8" : deque(),"TC9" : deque(),"TC10" : deque()}
+        
+        self.cycle_parameters = {"voltage1" : 0, "current1" : 0,"time1" : 0,"voltage2" : 0, "current2" : 0,"time2" : 0,"voltage3" : 0, "current3" : 0,"time3" : 0}
+        
         self.simulation_mode = False
         self.cycle_start_time = perf_counter()
         self.cycle_continue = False
-        self.cycle_end = False
 
     def connect_to_power_supply(self):
         power_supply_connection_thread = Thread(target = self.power_supply.connect, args = (self.ui_object,))
@@ -40,6 +42,7 @@ class Weld:
         plc_connection_thread.start()
 
     def emergency_stop(self):
+        
         emergency_stop_thread = Thread(target = self.power_supply.stop)
         emergency_stop_thread.start()
 
@@ -53,9 +56,10 @@ class Weld:
             self.cycle_continue = True
             self.cycle_start_time = perf_counter()
             #self.function_threads["run_cycle"].start()
-            run_cycle_threader = Thread(target = self.power_supply.run_cycle, args = (self.ui_object,self.voltage1,
-                            self.current1,self.cycle_time1,self.voltage2,self.current2 ,self.cycle_time1,self.voltage3 ,
-                            self.current3,self.cycle_time1,self.simulation_mode,))
+            run_cycle_threader = Thread(target = self.power_supply.run_cycle, args = (self.ui_object,self.cycle_parameters["voltage1"],self.cycle_parameters["current1"],self.cycle_parameters["time1"],     
+                                                                                      self.cycle_parameters["voltage2"],self.cycle_parameters["current2"],self.cycle_parameters["time2"],
+                                                                                      self.cycle_parameters["voltage3"],self.cycle_parameters["current3"],self.cycle_parameters["time3"],
+                                                                                      self.simulation_mode,))
 
             run_cycle_threader.start()
             print("Run cycle thread completed")
@@ -66,33 +70,24 @@ class Weld:
 
 
     def set_parameters(self):
-
-        try:
-            self.voltage1 = float(self.ui_object.voltage1_input.text())
-            self.current1 = float(self.ui_object.current1_input.text())
-            self.cycle_time1 = float(self.ui_object.time1_input.text())
-            self.voltage2 = float(self.ui_object.voltage2_input.text())
-            self.current2 = float(self.ui_object.current2_input.text())
-            self.cycle_time2 = float(self.ui_object.time2_input.text())
-            self.voltage3 = float(self.ui_object.voltage3_input.text())
-            self.current3 = float(self.ui_object.current3_input.text())
-            self.cycle_time3 = float(self.ui_object.time3_input.text())
-
-            self.ui_object.set_voltage1_label.setText(f"{self.voltage1} volts")
-            self.ui_object.set_current1_label.setText(f"{self.current1} ampers")
-            self.ui_object.set_time1_label.setText(f"{self.cycle_time1} sec")
-            self.ui_object.set_voltage2_label.setText(f"{self.voltage2} volts")
-            self.ui_object.set_current2_label.setText(f"{self.current2} ampers")
-            self.ui_object.set_time2_label.setText(f"{self.cycle_time2} sec")
-            self.ui_object.set_voltage3_label.setText(f"{self.voltage3} volts")
-            self.ui_object.set_current3_label.setText(f"{self.current3} ampers")
-            self.ui_object.set_time3_label.setText(f"{self.cycle_time3} sec")
-            print("Parameters are set")
-
-        except Exception as error:
-            print("Error while setting parameters : ",error)
-
-
+        
+        parameter_inputs = [self.ui_object.voltage1_input,self.ui_object.current1_input,self.ui_object.time1_input,
+                            self.ui_object.voltage2_input,self.ui_object.current2_input,self.ui_object.time2_input,
+                            self.ui_object.voltage3_input,self.ui_object.current3_input,self.ui_object.time3_input]
+        
+        parameter_labels = [self.ui_object.set_voltage1_label,self.ui_object.set_current1_label,self.ui_object.set_time1_label,
+                            self.ui_object.set_voltage2_label,self.ui_object.set_current2_label,self.ui_object.set_time2_label,
+                            self.ui_object.set_voltage3_label,self.ui_object.set_current3_label,self.ui_object.set_time3_label]
+        
+        i = 0
+        for key in self.cycle_parameters.keys():
+            try:
+                self.cycle_parameters[key] = float(parameter_inputs[i].text())
+                parameter_labels[i].setText(f"{self.cycle_parameters[key]}")
+                i += 1
+            except Exception as error:
+                print("Set value error: ", error)
+        print(self.cycle_parameters)
     def draw_write(self):
         """
         Calls measure power supply and plc functions to update Welder object data containers.
@@ -107,42 +102,44 @@ class Weld:
                 self.power_supply_datas["resistance"].append(power_supply_data[0] / power_supply_data[1])
             except ZeroDivisionError:
                 self.power_supply_datas["resistance"].append(0)
+                
             i = 0
             plc_data = self.plc.measure()
             for value in self.plc_datas.values():
                 value.append(plc_data[i])
                 i += 1
+                
+            print("Power supply measured data : ", power_supply_data)
+            print("PLC measured data : ", plc_data)
             #UI panel writing operations will be added
-
+            
             self.cycle_time = perf_counter() - self.cycle_start_time
             self.cycle_time_datas.append(self.cycle_time)
 
-            self.graph_object.draw_cycle(simulation_mode = False, connected_to_plc = False,time =self.cycle_time_datas, voltage = self.power_supply_datas["voltage"], current = self.power_supply_datas["current"],
-                                        resistance = self.power_supply_datas["resistance"],
+            self.graph_object.draw_cycle(connected_to_power_supply = True if self.simulation_mode else self.power_supply.connected,
+                                        connected_to_plc =  True if self.simulation_mode else self.plc.connected,
+                                        time =self.cycle_time_datas, voltage = self.power_supply_datas["voltage"],
+                                        current = self.power_supply_datas["current"],resistance = self.power_supply_datas["resistance"],
                                         tc1 = self.plc_datas["TC1"],tc2 = self.plc_datas["TC2"],tc3 = self.plc_datas["TC3"],
                                         tc4 = self.plc_datas["TC4"],tc5 = self.plc_datas["TC5"],tc6 = self.plc_datas["TC6"],
                                         tc7 = self.plc_datas["TC7"],tc8 = self.plc_datas["TC8"],tc9 = self.plc_datas["TC9"],
                                         tc10 = self.plc_datas["TC10"])
+        else:
+            print(f"Not drawing because self.cycle_continue is {self.cycle_continue}")
 
     def temperature_panel_writer(self,**temperatures):
         '''
         Measured temperature values will be written on related zone of ui panel
         '''
-        try:
-            self.ui_object.tc_label1.setText(f"{temperatures['tc1']}")
-            self.ui_object.tc_label2.setText(f"{temperatures['tc2']}")
-            self.ui_object.tc_label3.setText(f"{temperatures['tc3']}")
-            self.ui_object.tc_label4.setText(f"{temperatures['tc4']}")
-            self.ui_object.tc_label5.setText(f"{temperatures['tc5']}")
-            self.ui_object.tc_label6.setText(f"{temperatures['tc6']}")
-            self.ui_object.tc_label7.setText(f"{temperatures['tc7']}")
-            self.ui_object.tc_label8.setText(f"{temperatures['tc8']}")
-            self.ui_object.tc_label9.setText(f"{temperatures['tc9']}")
-            self.ui_object.tc_label10.setText(f"{temperatures['tc10']}")
-
-        except Exception as error:
-            print("Error in temperature writing on ui panel : ",error)
-
+        temp_label_array = [self.ui_object.tc_label1,self.ui_object.tc_label2,self.ui_object.tc_label3,self.ui_object.tc_label4,self.ui_object.tc_label5,
+                           self.ui_object.tc_label6,self.ui_object.tc_label7,self.ui_object.tc_label8,self.ui_object.tc_label9,self.ui_object.tc_label10]
+        i = 0
+        for value in temperatures.values():
+            try:
+                temp_label_array[i].setText(f"{value}")
+            except KeyError:
+                temp_label_array[i].setText(f"TC{i+1}-OFF")
+            i += 1
     def power_supply_panel_writer(self,voltage,current):
         '''
         Measured voltage, current and calculated resistance values will be written on related zone of ui panel

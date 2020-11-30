@@ -32,12 +32,12 @@ class Graph(pg.GraphicsWindow):
         '''
         pass
 
-    def draw_cycle(self,connected_to_plc = True, **data):
+    def draw_cycle(self,connected_to_power_supply = True, connected_to_plc = True, **data):
         '''
         Draw the cyle parameters to graph. This function do not use thread because thread is already using by QTimer function which calls this function repeatedly
         '''
 
-        if connected_to_plc:
+        if connected_to_plc and connected_to_power_supply:
             try:
                 for (curve_key,curve_item), (arg_key,arg_value) in zip(self.curves.items(), data.items()):
                     if arg_key != "time":

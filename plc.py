@@ -15,6 +15,7 @@ class Plc:
             self.device.connect()
             tc_values = self.device.read_holding_registers(40, 10, unit=0)
             assert(tcValues.function_code < 0x80)
+            self.connected = True
             if ui:
                 ui.plc_connection_button.setStyleSheet("background-color: rgb(78, 154, 6)")
                 ui.plc_connection_button.setText(f"CONNECTED TO \nPLC")
@@ -23,6 +24,7 @@ class Plc:
             if ui:
                 ui.plc_connection_button.setStyleSheet("background-color: rgb(255, 85, 0)")
                 ui.plc_connection_button.setText(f"NOT CONNECTED TO \nPLC...")
+            self.connected = False
             print("Connection to PLC error : ", error)
             return 1
 

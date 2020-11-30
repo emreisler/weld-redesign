@@ -3,6 +3,7 @@ from time import perf_counter
 import math
 
 class PowerSupply:
+    
     def __init__(self,ip = "192.168.1.32",port=None):
         self.ip = ip
         self.cycle_continue = False
@@ -53,8 +54,8 @@ class PowerSupply:
         else:
             return -1
 
-    def run_cycle(self,ui = None, voltage1 = 0, current1 = 0, time1 = 0, voltage2 = 0,
-                current2 = 0, time2 = 0, voltage3 = 0, current3 = 0, time3 = 0,simulation_mode = False):
+    def run_cycle(self,ui = None, voltage1 = 10, current1 = 10, time1 = 10, voltage2 = 10,
+                current2 = 10, time2 = 10, voltage3 = 10, current3 = 10, time3 = 10,simulation_mode = False):
         '''
         Runs cycle and and return 0 if cycle completed succesfully , else return -1.
         ui = user_interface
@@ -86,14 +87,22 @@ class PowerSupply:
 
                 cycle_time = current_cycle_time - start_time
 
-
+        
                 total_time = time1 + time2 + time3
-                completed_ratio = cycle_time / total_time
-                completed_percent = math.ceil(completed_ratio * 100)
+                
 
+                
                 if ui:
                     ui.cycle_info_label.setText(f"Cycle running...{step_name}\nRemaining time {round(time1 + time2 + time3 - cycle_time)} seconds.. ")
-                    # core is dumping ui.progressBar.setValue(completed_percent)
+                    try:
+                        completed_ratio = cycle_time / total_time
+                        completed_percent = math.ceil(completed_ratio * 100)
+                    except ZeroDivisionError:
+                        completed_percent = 0
+                    try:
+                        ui.progressBar.setValue(completed_percent)
+                    except Exception as error:
+                        print("Progress bar error",error)
 
 
                 #Check time every loop and jump to second step parameters if cycletime exceeds set time for 1st step
@@ -150,6 +159,7 @@ class PowerSupply:
             print("Cycle finished with an error : ",error)
             return -1
         raise NotImplementedError
+    
     def stop(self):
         '''
         Make current and voltage to zero and stops the cycle.
@@ -174,7 +184,7 @@ class PowerSupply:
                 measured_voltage = self.voltage_values[0]
                 current_values = self.power_supply_datas.query_ascii_values(':MEASure:CURRent?')
                 measured_current = self.current_values[0]
-                return (round(measured_voltage,2), round(measured_current,2)
+                return (round(measured_voltage,2), round(measured_current,2))
 
             except Exception as error:
                 print("Couldn' t measured : ", error)
