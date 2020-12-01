@@ -7,7 +7,7 @@ from random import randint
 import sys
 from power_supply import PowerSupply
 from plc import Plc
-
+from worker import Worker
 
 class Weld:
 
@@ -31,7 +31,6 @@ class Weld:
         
         self.simulation_mode = False
         self.cycle_start_time = perf_counter()
-        self.cycle_continue = False
         #TRY TO DRAW GRAPH EVERY 1SECOND 
         self.timer_graph = QtCore.QTimer()
         self.timer_graph.timeout.connect(self.draw_write)
@@ -47,7 +46,7 @@ class Weld:
 
     def emergency_stop(self):
         
-        emergency_stop_thread = Thread(target = self.power_supply.stop)
+        emergency_stop_thread = Thread(target = self.power_supply.stop, args = (self.ui_object,self.simulation_mode,))
         emergency_stop_thread.start()
 
     def measure_resistance(self):
@@ -57,16 +56,22 @@ class Weld:
     def run_cycle(self):
         try:
             self.graph_object.clear_graph()
-            self.cycle_continue = True
+            self.power_supply.cycle_continue = True
             self.cycle_start_time = perf_counter()
             #self.function_threads["run_cycle"].start()
             run_cycle_threader = Thread(target = self.power_supply.run_cycle, args = (self.ui_object,self.cycle_parameters["voltage1"],self.cycle_parameters["current1"],self.cycle_parameters["time1"],     
                                                                                       self.cycle_parameters["voltage2"],self.cycle_parameters["current2"],self.cycle_parameters["time2"],
                                                                                       self.cycle_parameters["voltage3"],self.cycle_parameters["current3"],self.cycle_parameters["time3"],
                                                                                       self.simulation_mode,))
+                                                                                      
 
             run_cycle_threader.start()
+            #self.run_thread = Worker(self.power_supply.run_cycle, self.ui_object,self.cycle_parameters["voltage1"],self.cycle_parameters["current1"],self.cycle_parameters["time1"],     
+                                                                                      #self.cycle_parameters["voltage2"],self.cycle_parameters["current2"],self.cycle_parameters["time2"],
+                                                                                      #self.cycle_parameters["voltage3"],self.cycle_parameters["current3"],self.cycle_parameters["time3"],
+                                                                                      #self.simulation_mode)
             
+            #self.run_thread.run()
             self.timer_graph.start(1000)
             print("Run cycle thread completed")
             return 0
@@ -101,9 +106,9 @@ class Weld:
         Calls measure power supply and plc functions to update Welder object data containers.
         And calls draw cycle function of Graph object to draw contained data.
         """
-        print("draw")
+        print(self.power_supply.cycle_continue)
         
-        if self.cycle_continue:
+        if self.power_supply.cycle_continue:
             power_supply_data = self.power_supply.measure(simu_mode=self.simulation_mode)
             self.power_supply_datas["voltage"].append(power_supply_data[0])
             self.power_supply_datas["current"].append(power_supply_data[1])
@@ -136,7 +141,7 @@ class Weld:
                                         tc7 = self.plc_datas["TC7"],tc8 = self.plc_datas["TC8"],tc9 = self.plc_datas["TC9"],
                                         tc10 = self.plc_datas["TC10"])
         else:
-            print(f"Not drawing because self.cycle_continue is {self.cycle_continue}")
+            print(f"Not drawing because self.cycle_continue is {self.power_supply.cycle_continue}")
         
 
     def temperature_panel_writer(self,**temperatures):
