@@ -55,6 +55,11 @@ class Weld:
 
     def run_cycle(self):
         try:
+            for value in self.power_supply_datas.values():
+                value.clear()
+            for value in self.plc_datas.values():
+                value.clear()
+            self.cycle_time_datas.clear()
             self.graph_object.clear_graph()
             self.power_supply.cycle_continue = True
             self.cycle_start_time = perf_counter()
@@ -72,6 +77,7 @@ class Weld:
                                                                                       #self.simulation_mode)
             
             #self.run_thread.run()
+            
             self.timer_graph.start(1000)
             print("Run cycle thread completed")
             return 0

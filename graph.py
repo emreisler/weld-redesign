@@ -30,7 +30,9 @@ class Graph(pg.GraphicsWindow):
         '''
         Clearing the polotted curves.
         '''
-        pass
+        for curve in self.curves.values():
+            curve.clear()
+            
 
     def draw_cycle(self,connected_to_power_supply = True, connected_to_plc = True, **data):
         '''
